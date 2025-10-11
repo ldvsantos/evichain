@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+
+# Environment and secrets
+.env
+.env.*
+
+# Node (if any front-end tooling is added later)
+node_modules/
+
+# Logs
+*.log
+
+# Coverage
+htmlcov/
+.coverage*

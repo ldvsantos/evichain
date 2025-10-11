@@ -1,0 +1,55 @@
+================================================================
+                    EVICHAIN - SISTEMA ESSENCIAL
+================================================================
+
+INSTALACAO:
+-----------
+pip install -r requirements.txt
+
+
+INICIAR:
+--------
+python api_server.py
+
+
+ACESSAR:
+--------
+http://localhost:5000
+
+
+VERIFICAR OPENAI:
+-----------------
+Ao iniciar, deve aparecer:
+[INFO] IA OpenAI inicializada com sucesso
+
+Se aparecer erro, verifique o arquivo .env
+
+
+ARQUIVOS:
+---------
+Backend (5):
+- api_server.py
+- assistente_denuncia.py
+- ia_engine_openai_padrao.py
+- ia_analisador_texto.py
+- blockchain_simulator.py
+
+Frontend (6):
+- index.html
+- dashboard.html
+- styles.css
+- dashboard.css
+- script.js
+- dashboard.js
+
+Dados (4):
+- .env
+- blockchain_data.json
+- legislacao_conselhos.json
+- requirements.txt
+
+
+PRONTO! Sistema completo e funcional.
+
+================================================================
+
