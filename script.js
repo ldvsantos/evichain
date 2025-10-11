@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = {
             titulo: document.getElementById('titulo').value,
+            nomeDenunciado: document.getElementById('nomeDenunciado').value,
             descricao: document.getElementById('descricao').value,
             conselho: document.getElementById('conselho').value,
             categoria: document.getElementById('categoria').value,
@@ -43,6 +44,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!formData.descricao || formData.descricao.trim().length < 10) {
             showMessage(formMessage, 'error', 'O campo "Descrição Detalhada" é obrigatório (mínimo 10 caracteres).');
+            resetButton(submitButton);
+            return;
+        }
+
+        if (!formData.nomeDenunciado || formData.nomeDenunciado.trim().length < 2) {
+            showMessage(formMessage, 'error', 'O campo "Nome do Profissional Denunciado" é obrigatório (mínimo 2 caracteres).');
             resetButton(submitButton);
             return;
         }

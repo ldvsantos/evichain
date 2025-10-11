@@ -148,11 +148,15 @@ def submit_complaint():
 
         # ===== CORREÇÃO FINAL =====
         title = data.get('titulo', 'Denúncia sem Título')
+        nome_denunciado = data.get('nomeDenunciado', '').strip()
         description = data.get('descricao', '')
         # ==========================
         
         if not description:
             return jsonify({"success": False, "error": "O campo 'descricao' é obrigatório."}), 400
+            
+        if not nome_denunciado:
+            return jsonify({"success": False, "error": "O campo 'nomeDenunciado' é obrigatório."}), 400
         
         # Validação dos novos campos obrigatórios
         assunto = data.get('assunto', '').strip()
@@ -166,6 +170,7 @@ def submit_complaint():
 
         transaction_data = {
             'titulo': title,
+            'nomeDenunciado': nome_denunciado,
             'descricao': description,
             'conselho': data.get('conselho', 'N/A'),
             'categoria': data.get('categoria', 'N/A'),
@@ -500,6 +505,7 @@ def generate_pdf():
         # Extrair todos os dados da denúncia
         complaint_id = data.get('complaint_id', 'N/A')
         titulo = data.get('titulo', 'N/A')
+        nome_denunciado = data.get('nomeDenunciado', 'N/A')
         assunto = data.get('assunto', 'N/A')
         prioridade = data.get('prioridade', 'N/A')
         finalidade = data.get('finalidade', 'N/A')
@@ -665,6 +671,7 @@ def generate_pdf():
         # Criar tabela para informações básicas
         basic_info_data = [
             ['Título:', titulo],
+            ['Nome do Profissional Denunciado:', nome_denunciado],
             ['Assunto:', assunto],
             ['Prioridade:', prioridade],
             ['Finalidade:', finalidade],
