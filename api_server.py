@@ -513,84 +513,215 @@ def generate_pdf():
         ia_analysis = data.get('ia_analysis', {})
         metadata = data.get('metadata', {})
         
-        from reportlab.lib.pagesizes import letter
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-        from reportlab.lib.units import inch
+        from reportlab.lib.units import inch, cm
+        from reportlab.lib import colors
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
         from io import BytesIO
         
-        # Criar documento PDF em memória
+        # Criar documento PDF em memória com margens profissionais
         buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter, 
-                              rightMargin=72, leftMargin=72,
-                              topMargin=72, bottomMargin=18)
+        doc = SimpleDocTemplate(buffer, pagesize=A4, 
+                              rightMargin=2*cm, leftMargin=2*cm,
+                              topMargin=3*cm, bottomMargin=2*cm)
         
-        # Estilos
+        # Estilos profissionais para relatório
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
+        
+        # Estilo do cabeçalho principal
+        header_style = ParagraphStyle(
+            'ReportHeader',
             parent=styles['Heading1'],
-            fontSize=16,
-            spaceAfter=30,
-            alignment=1  # Centralizado
+            fontSize=18,
+            spaceAfter=10,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold',
+            textColor=colors.HexColor('#1a365d')
         )
         
-        heading_style = ParagraphStyle(
-            'CustomHeading',
+        # Estilo do subtítulo
+        subtitle_style = ParagraphStyle(
+            'ReportSubtitle',
+            parent=styles['Heading2'],
+            fontSize=14,
+            spaceAfter=20,
+            alignment=TA_CENTER,
+            fontName='Helvetica',
+            textColor=colors.HexColor('#2d3748')
+        )
+        
+        # Estilo para seções principais
+        section_style = ParagraphStyle(
+            'SectionHeader',
             parent=styles['Heading2'],
             fontSize=14,
             spaceAfter=12,
-            textColor='#2c3e50'
+            spaceBefore=20,
+            alignment=TA_LEFT,
+            fontName='Helvetica-Bold',
+            textColor=colors.HexColor('#2c5282'),
+            borderWidth=1,
+            borderColor=colors.HexColor('#e2e8f0'),
+            borderPadding=8,
+            backColor=colors.HexColor('#f7fafc')
         )
         
-        # Conteúdo do PDF
+        # Estilo para subseções
+        subsection_style = ParagraphStyle(
+            'SubsectionHeader',
+            parent=styles['Heading3'],
+            fontSize=12,
+            spaceAfter=8,
+            spaceBefore=12,
+            alignment=TA_LEFT,
+            fontName='Helvetica-Bold',
+            textColor=colors.HexColor('#4a5568')
+        )
+        
+        # Estilo para texto normal com melhor formatação
+        normal_style = ParagraphStyle(
+            'ReportNormal',
+            parent=styles['Normal'],
+            fontSize=10,
+            spaceAfter=6,
+            alignment=TA_JUSTIFY,
+            fontName='Helvetica',
+            leading=14
+        )
+        
+        # Estilo para dados importantes
+        important_style = ParagraphStyle(
+            'ImportantData',
+            parent=styles['Normal'],
+            fontSize=10,
+            spaceAfter=4,
+            alignment=TA_LEFT,
+            fontName='Helvetica',
+            textColor=colors.HexColor('#2d3748'),
+            leftIndent=20
+        )
+        
+        # Conteúdo do relatório
         story = []
         
-        # Título
-        story.append(Paragraph("RELATÓRIO DE DENÚNCIA - EVICHAIN", title_style))
-        story.append(Spacer(1, 20))
-        
-        # Informações básicas completas
-        story.append(Paragraph("INFORMAÇÕES BÁSICAS DA DENÚNCIA", heading_style))
-        story.append(Paragraph(f"<b>ID da Denúncia:</b> {complaint_id}", styles['Normal']))
-        story.append(Paragraph(f"<b>Título:</b> {titulo}", styles['Normal']))
-        story.append(Paragraph(f"<b>Assunto:</b> {assunto}", styles['Normal']))
-        story.append(Paragraph(f"<b>Prioridade:</b> {prioridade}", styles['Normal']))
-        story.append(Paragraph(f"<b>Finalidade:</b> {finalidade}", styles['Normal']))
-        story.append(Paragraph(f"<b>Conselho:</b> {conselho}", styles['Normal']))
-        story.append(Paragraph(f"<b>Categoria:</b> {categoria}", styles['Normal']))
-        
-        # Formatar data
+        # Formatar data primeiro
         try:
             if timestamp:
                 data_formatada = datetime.fromisoformat(timestamp.replace('Z', '+00:00')).strftime('%d/%m/%Y %H:%M')
             else:
-                data_formatada = 'N/A'
+                data_formatada = datetime.now().strftime('%d/%m/%Y %H:%M')
         except:
-            data_formatada = timestamp or 'N/A'
-            
-        story.append(Paragraph(f"<b>Data de Registro:</b> {data_formatada}", styles['Normal']))
-        story.append(Paragraph(f"<b>Status:</b> Registrada", styles['Normal']))
+            data_formatada = timestamp or datetime.now().strftime('%d/%m/%Y %H:%M')
         
-        if codigosAnteriores:
-            story.append(Paragraph(f"<b>Códigos Anteriores:</b> {codigosAnteriores}", styles['Normal']))
+        # === CABEÇALHO FORMAL DO RELATÓRIO ===
         
-        story.append(Spacer(1, 15))
+        # Logo/Título institucional
+        story.append(Paragraph("EVICHAIN", header_style))
+        story.append(Paragraph("Sistema Blockchain para Evidências Digitais", subtitle_style))
         
-        # Configurações de privacidade
-        story.append(Paragraph("CONFIGURAÇÕES DE PRIVACIDADE", heading_style))
-        story.append(Paragraph(f"<b>Ouvidoria Anônima:</b> {'Sim' if ouvidoriaAnonima else 'Não'}", styles['Normal']))
-        story.append(Paragraph(f"<b>Manter Anonimato:</b> {'Sim' if anonymous else 'Não'}", styles['Normal']))
-        story.append(Spacer(1, 15))
-        
-        # Descrição da denúncia
-        story.append(Paragraph("DESCRIÇÃO DA DENÚNCIA", heading_style))
-        story.append(Paragraph(descricao, styles['Normal']))
+        # Linha divisória
+        story.append(Spacer(1, 10))
+        divider_table = Table([['_' * 80]], colWidths=[15*cm])
+        divider_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#a0aec0'))
+        ]))
+        story.append(divider_table)
         story.append(Spacer(1, 20))
         
-        # Análise da IA - Completa e Detalhada
+        # Título do relatório
+        story.append(Paragraph("RELATÓRIO DE ANÁLISE DE DENÚNCIA", header_style))
+        story.append(Spacer(1, 10))
+        
+        # Informações do documento
+        doc_info_data = [
+            ['ID da Denúncia:', complaint_id],
+            ['Data de Geração:', data_formatada],
+            ['Documento:', f'EviChain_Relatorio_{complaint_id}_{datetime.now().strftime("%Y-%m-%d")}.pdf'],
+            ['Status:', 'CONFIDENCIAL - USO RESTRITO']
+        ]
+        
+        doc_info_table = Table(doc_info_data, colWidths=[4*cm, 10*cm])
+        doc_info_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f7fafc')),
+            ('PADDING', (0, 0), (-1, -1), 6),
+        ]))
+        story.append(doc_info_table)
+        story.append(Spacer(1, 30))
+        
+        # === SEÇÃO 1: INFORMAÇÕES BÁSICAS DA DENÚNCIA ===
+        story.append(Paragraph("1. INFORMAÇÕES BÁSICAS DA DENÚNCIA", section_style))
+        
+        # Criar tabela para informações básicas
+        basic_info_data = [
+            ['Título:', titulo],
+            ['Assunto:', assunto],
+            ['Prioridade:', prioridade],
+            ['Finalidade:', finalidade],
+            ['Conselho:', conselho],
+            ['Categoria:', categoria],
+            ['Data de Registro:', data_formatada],
+            ['Status:', 'Registrada e Analisada']
+        ]
+        
+        if codigosAnteriores:
+            basic_info_data.append(['Códigos Anteriores:', codigosAnteriores])
+        
+        basic_info_table = Table(basic_info_data, colWidths=[4*cm, 11*cm])
+        basic_info_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8fafc')),
+            ('PADDING', (0, 0), (-1, -1), 8),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+        ]))
+        story.append(basic_info_table)
+        story.append(Spacer(1, 20))
+        
+        # === SEÇÃO 2: CONFIGURAÇÕES DE PRIVACIDADE ===
+        story.append(Paragraph("2. CONFIGURAÇÕES DE PRIVACIDADE", section_style))
+        
+        privacy_data = [
+            ['Ouvidoria Anônima:', 'Sim' if ouvidoriaAnonima else 'Não'],
+            ['Manter Anonimato:', 'Sim' if anonymous else 'Não']
+        ]
+        
+        privacy_table = Table(privacy_data, colWidths=[4*cm, 11*cm])
+        privacy_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8fafc')),
+            ('PADDING', (0, 0), (-1, -1), 8),
+        ]))
+        story.append(privacy_table)
+        story.append(Spacer(1, 20))
+        
+        # === SEÇÃO 3: DESCRIÇÃO DA DENÚNCIA ===
+        story.append(Paragraph("3. DESCRIÇÃO DA DENÚNCIA", section_style))
+        story.append(Paragraph(descricao, normal_style))
+        story.append(Spacer(1, 25))
+        
+        # === SEÇÃO 4: ANÁLISE DA INTELIGÊNCIA ARTIFICIAL ===
         if ia_analysis:
-            story.append(Paragraph("ANÁLISE DA INTELIGÊNCIA ARTIFICIAL", heading_style))
+            story.append(Paragraph("4. ANÁLISE DA INTELIGÊNCIA ARTIFICIAL", section_style))
             story.append(Spacer(1, 10))
             
             # Informações básicas da análise
@@ -598,188 +729,290 @@ def generate_pdf():
             classificacao_risco = ia_analysis.get('classificacao_risco', {})
             analise_basica = ia_analysis.get('analise_basica', {})
             
+            # Criar tabela de análise principal
+            analise_data = []
+            
             if analise_juridica.get('gravidade'):
-                story.append(Paragraph(f"<b>Gravidade:</b> {analise_juridica['gravidade']}", styles['Normal']))
+                analise_data.append(['Gravidade:', analise_juridica['gravidade'].title()])
             
             if analise_juridica.get('tipificacao'):
-                story.append(Paragraph(f"<b>Tipificação:</b> {analise_juridica['tipificacao']}", styles['Normal']))
+                analise_data.append(['Tipificação:', analise_juridica['tipificacao']])
             
             if classificacao_risco.get('nivel') and classificacao_risco.get('pontuacao'):
                 nivel = classificacao_risco['nivel']
                 pontuacao = classificacao_risco['pontuacao']
-                story.append(Paragraph(f"<b>Nível de Risco:</b> {nivel} ({pontuacao}/100)", styles['Normal']))
+                analise_data.append(['Nível de Risco:', f"{nivel} ({pontuacao}/100)"])
             
             if classificacao_risco.get('acao_recomendada'):
-                story.append(Paragraph(f"<b>Ação Recomendada:</b> {classificacao_risco['acao_recomendada']}", styles['Normal']))
+                analise_data.append(['Ação Recomendada:', classificacao_risco['acao_recomendada']])
             
-            if 'classificacao' in ia_analysis:
-                story.append(Paragraph(f"<b>Classificação:</b> {ia_analysis['classificacao']}", styles['Normal']))
-            
-            story.append(Spacer(1, 12))
+            if analise_data:
+                analise_table = Table(analise_data, colWidths=[4*cm, 11*cm])
+                analise_table.setStyle(TableStyle([
+                    ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                    ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                    ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 10),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                    ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8fafc')),
+                    ('PADDING', (0, 0), (-1, -1), 8),
+                ]))
+                story.append(analise_table)
+                story.append(Spacer(1, 15))
             
             # Resumo da análise
             if analise_basica.get('resumo'):
-                story.append(Paragraph("<b>Resumo da Análise:</b>", styles['Normal']))
-                story.append(Paragraph(analise_basica['resumo'], styles['Normal']))
+                story.append(Paragraph("4.1 Resumo da Análise", subsection_style))
+                story.append(Paragraph(analise_basica['resumo'], normal_style))
                 story.append(Spacer(1, 12))
             
             if analise_juridica.get('fundamentacao'):
-                story.append(Paragraph("<b>Análise Detalhada:</b>", styles['Normal']))
-                story.append(Paragraph(analise_juridica['fundamentacao'], styles['Normal']))
+                story.append(Paragraph("4.2 Análise Detalhada", subsection_style))
+                story.append(Paragraph(analise_juridica['fundamentacao'], normal_style))
                 story.append(Spacer(1, 12))
             
-            # Legislação Recomendada
+            # === SUBSEÇÃO: LEGISLAÇÃO RECOMENDADA ===
             legislacao_especifica = analise_juridica.get('legislacao_especifica', {})
             if legislacao_especifica:
-                story.append(Paragraph("LEGISLAÇÃO RECOMENDADA PELA IA", heading_style))
+                story.append(Paragraph("4.3 Legislação Recomendada pela IA", subsection_style))
                 
+                leg_data = []
                 if legislacao_especifica.get('legislacao_sugerida'):
-                    story.append(Paragraph(f"<b>Legislação Sugerida:</b> {legislacao_especifica['legislacao_sugerida']}", styles['Normal']))
+                    leg_data.append(['Legislação Sugerida:', legislacao_especifica['legislacao_sugerida']])
                 
                 if legislacao_especifica.get('conselho'):
-                    story.append(Paragraph(f"<b>Conselho:</b> {legislacao_especifica['conselho']}", styles['Normal']))
+                    leg_data.append(['Conselho:', legislacao_especifica['conselho']])
                 
                 if legislacao_especifica.get('tipo'):
-                    story.append(Paragraph(f"<b>Tipo de Infração:</b> {legislacao_especifica['tipo']}", styles['Normal']))
+                    leg_data.append(['Tipo de Infração:', legislacao_especifica['tipo']])
                 
                 if legislacao_especifica.get('descricao'):
-                    story.append(Paragraph(f"<b>Descrição:</b> {legislacao_especifica['descricao']}", styles['Normal']))
+                    leg_data.append(['Descrição:', legislacao_especifica['descricao']])
                 
                 if legislacao_especifica.get('artigos'):
                     artigos = legislacao_especifica['artigos']
                     if isinstance(artigos, list):
                         artigos = ' '.join(artigos)
-                    story.append(Paragraph(f"<b>Artigos:</b> {artigos}", styles['Normal']))
+                    leg_data.append(['Artigos:', artigos])
                 
                 if legislacao_especifica.get('penalidades'):
                     penalidades = legislacao_especifica['penalidades']
                     if isinstance(penalidades, list):
                         penalidades = ', '.join(penalidades)
-                    story.append(Paragraph(f"<b>Penalidades:</b> {penalidades}", styles['Normal']))
+                    leg_data.append(['Penalidades:', penalidades])
                 
-                story.append(Spacer(1, 12))
+                if leg_data:
+                    leg_table = Table(leg_data, colWidths=[4*cm, 11*cm])
+                    leg_table.setStyle(TableStyle([
+                        ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                        ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 10),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#fff8dc')),
+                        ('PADDING', (0, 0), (-1, -1), 8),
+                        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ]))
+                    story.append(leg_table)
+                    story.append(Spacer(1, 12))
             
-            # Palavras-chave identificadas
+            # === SUBSEÇÃO: PALAVRAS-CHAVE ===
             palavras_chave = analise_basica.get('palavras_chave', [])
             if palavras_chave:
-                story.append(Paragraph("PALAVRAS-CHAVE IDENTIFICADAS", heading_style))
+                story.append(Paragraph("4.4 Palavras-Chave Identificadas", subsection_style))
                 if isinstance(palavras_chave, list):
                     for palavra in palavras_chave:
-                        story.append(Paragraph(f"• {palavra}", styles['Normal']))
+                        story.append(Paragraph(f"• {palavra}", important_style))
                 else:
-                    story.append(Paragraph(palavras_chave, styles['Normal']))
+                    story.append(Paragraph(palavras_chave, normal_style))
                 story.append(Spacer(1, 12))
             
-            # Recomendações
+            # === SUBSEÇÃO: RECOMENDAÇÕES ===
             recomendacoes = ia_analysis.get('recomendacoes', [])
             if recomendacoes:
-                story.append(Paragraph("RECOMENDAÇÕES", heading_style))
+                story.append(Paragraph("4.5 Recomendações", subsection_style))
                 if isinstance(recomendacoes, list):
                     for rec in recomendacoes:
-                        story.append(Paragraph(f"• {rec}", styles['Normal']))
+                        story.append(Paragraph(f"• {rec}", important_style))
                 else:
-                    story.append(Paragraph(recomendacoes, styles['Normal']))
+                    story.append(Paragraph(recomendacoes, normal_style))
                 story.append(Spacer(1, 12))
-            
-            # Informações adicionais de risco
-            if classificacao_risco.get('pontuacao'):
-                story.append(Paragraph(f"<b>Pontuação de Risco:</b> {classificacao_risco['pontuacao']}/100", styles['Normal']))
             
             # Fatores de risco
             fatores_risco = classificacao_risco.get('fatores_risco', [])
             if fatores_risco and isinstance(fatores_risco, list):
-                story.append(Paragraph("<b>Fatores de Risco:</b>", styles['Normal']))
+                story.append(Paragraph("4.6 Fatores de Risco", subsection_style))
                 for fator in fatores_risco:
-                    story.append(Paragraph(f"• {fator}", styles['Normal']))
+                    story.append(Paragraph(f"• {fator}", important_style))
+                story.append(Spacer(1, 15))
             
             story.append(Spacer(1, 20))
         
-        # Investigação automática
+        # === SEÇÃO 5: INVESTIGAÇÃO AUTOMÁTICA ===
         investigacao = ia_analysis.get('investigacao_automatica', {}) if ia_analysis else {}
         if investigacao:
-            story.append(Paragraph("INVESTIGAÇÃO AUTOMÁTICA REALIZADA", heading_style))
+            story.append(Paragraph("5. INVESTIGAÇÃO AUTOMÁTICA REALIZADA", section_style))
             story.append(Spacer(1, 10))
             
             # Relatório de detecção formatado
             if 'relatorio_deteccao' in investigacao:
-                story.append(Paragraph("Relatório de Detecção de Profissionais", heading_style))
+                story.append(Paragraph("5.1 Relatório de Detecção de Profissionais", subsection_style))
                 
                 deteccao = investigacao.get('deteccao_nomes', {})
                 
-                # Estatísticas gerais
-                if deteccao.get('confiabilidade_geral') is not None:
-                    story.append(Paragraph(f"<b>Confiabilidade Geral:</b> {deteccao.get('confiabilidade_geral', 0)}%", styles['Normal']))
+                # Estatísticas gerais em tabela
+                stats_data = []
+                if deteccao.get('confiabilidade_deteccao') is not None:
+                    stats_data.append(['Confiabilidade Geral:', f"{deteccao.get('confiabilidade_deteccao', 0)}%"])
                 
                 if deteccao.get('contexto_profissional') is not None:
                     contexto = "SIM" if deteccao.get('contexto_profissional') else "NÃO"
-                    story.append(Paragraph(f"<b>Contexto Profissional Detectado:</b> {contexto}", styles['Normal']))
+                    stats_data.append(['Contexto Profissional Detectado:', contexto])
                 
-                if deteccao.get('recomenda_investigacao') is not None:
-                    recomenda = "SIM" if deteccao.get('recomenda_investigacao') else "NÃO"
-                    story.append(Paragraph(f"<b>Recomenda Investigação:</b> {recomenda}", styles['Normal']))
+                if deteccao.get('recomendacao_investigacao') is not None:
+                    recomenda = "SIM" if deteccao.get('recomendacao_investigacao') else "NÃO"
+                    stats_data.append(['Recomenda Investigação:', recomenda])
                 
-                story.append(Spacer(1, 15))
+                if stats_data:
+                    stats_table = Table(stats_data, colWidths=[6*cm, 9*cm])
+                    stats_table.setStyle(TableStyle([
+                        ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                        ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                        ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+                        ('FONTSIZE', (0, 0), (-1, -1), 10),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f0f8ff')),
+                        ('PADDING', (0, 0), (-1, -1), 8),
+                    ]))
+                    story.append(stats_table)
+                    story.append(Spacer(1, 15))
             
             # Profissionais identificados de forma organizada
             deteccao = investigacao.get('deteccao_nomes', {})
             if deteccao.get('nomes_detectados'):
-                story.append(Paragraph("Profissionais Identificados", heading_style))
+                story.append(Paragraph("5.2 Profissionais Identificados", subsection_style))
+                
+                # Criar tabela para profissionais detectados
+                prof_data = [['#', 'Nome Detectado', 'Confiabilidade', 'Contexto']]
                 
                 for i, nome in enumerate(deteccao['nomes_detectados'], 1):
-                    # Cabeçalho do profissional
                     nome_profissional = nome.get('nome_detectado', f'Profissional {i}')
-                    confiabilidade = nome.get('confiabilidade', 0)
+                    confiabilidade = f"{nome.get('confiabilidade', 0)}%"
+                    contexto = nome.get('contexto_encontrado', 'N/A')
                     
-                    story.append(Paragraph(f"<b>{i}. {nome_profissional}</b>", styles['Normal']))
-                    story.append(Paragraph(f"   • Confiabilidade: {confiabilidade}%", styles['Normal']))
-                    
-                    contexto = nome.get('contexto_encontrado', 'Contexto não disponível')
-                    story.append(Paragraph(f"   • Contexto: {contexto}", styles['Normal']))
-                    story.append(Spacer(1, 8))
+                    prof_data.append([str(i), nome_profissional, confiabilidade, contexto])
                 
+                prof_table = Table(prof_data, colWidths=[1*cm, 5*cm, 2.5*cm, 6.5*cm])
+                prof_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4a5568')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 9),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8f9fa')),
+                    ('PADDING', (0, 0), (-1, -1), 6),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ]))
+                story.append(prof_table)
                 story.append(Spacer(1, 15))
             
             # Resultados das investigações de forma organizada
             investigacoes = investigacao.get('investigacoes_realizadas', [])
             if investigacoes:
-                story.append(Paragraph("Resultados das Investigações Detalhadas", heading_style))
+                story.append(Paragraph("5.3 Resultados das Investigações Detalhadas", subsection_style))
                 
                 for i, inv in enumerate(investigacoes, 1):
                     nome_investigado = inv.get('nome_investigado', f'Investigação {i}')
-                    story.append(Paragraph(f"<b>{i}. Investigação: {nome_investigado}</b>", styles['Normal']))
+                    story.append(Paragraph(f"5.3.{i} Investigação: {nome_investigado}", subsection_style))
                     
                     resultado = inv.get('resultado_investigacao', {})
                     registros = resultado.get('registros_oficiais', {})
                     
+                    inv_data = []
+                    
                     if registros.get('registro_encontrado'):
-                        story.append(Paragraph("   • <b>Status:</b> REGISTRO ENCONTRADO ✓", styles['Normal']))
+                        inv_data.append(['Status:', 'REGISTRO ENCONTRADO ✓'])
                         
                         dados_prof = registros.get('dados_profissional', {})
                         if dados_prof.get('nome_completo_oficial'):
-                            story.append(Paragraph(f"   • <b>Nome Oficial:</b> {dados_prof['nome_completo_oficial']}", styles['Normal']))
+                            inv_data.append(['Nome Oficial:', dados_prof['nome_completo_oficial']])
                         
                         if dados_prof.get('registro_crm_completo') or dados_prof.get('registro_completo'):
                             registro = dados_prof.get('registro_crm_completo') or dados_prof.get('registro_completo')
-                            story.append(Paragraph(f"   • <b>Registro:</b> {registro}", styles['Normal']))
+                            inv_data.append(['Registro:', registro])
                         
                         if dados_prof.get('situacao_registro'):
-                            story.append(Paragraph(f"   • <b>Situação:</b> {dados_prof['situacao_registro']}", styles['Normal']))
+                            inv_data.append(['Situação:', dados_prof['situacao_registro']])
                         
                         if dados_prof.get('especialidades'):
                             especialidades = ', '.join(dados_prof['especialidades'])
-                            story.append(Paragraph(f"   • <b>Especialidades:</b> {especialidades}", styles['Normal']))
+                            inv_data.append(['Especialidades:', especialidades])
                             
                     else:
-                        story.append(Paragraph("   • <b>Status:</b> REGISTRO NÃO ENCONTRADO ✗", styles['Normal']))
+                        inv_data.append(['Status:', 'REGISTRO NÃO ENCONTRADO ✗'])
                         if resultado.get('motivo_nao_encontrado'):
-                            story.append(Paragraph(f"   • <b>Motivo:</b> {resultado['motivo_nao_encontrado']}", styles['Normal']))
+                            inv_data.append(['Motivo:', resultado['motivo_nao_encontrado']])
                     
-                    story.append(Spacer(1, 12))
+                    if inv_data:
+                        inv_table = Table(inv_data, colWidths=[3*cm, 12*cm])
+                        inv_table.setStyle(TableStyle([
+                            ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
+                            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+                            ('FONTNAME', (1, 0), (1, -1), 'Helvetica'),
+                            ('FONTSIZE', (0, 0), (-1, -1), 9),
+                            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                            ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f0fff0')),
+                            ('PADDING', (0, 0), (-1, -1), 6),
+                            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                        ]))
+                        story.append(inv_table)
+                        story.append(Spacer(1, 12))
                 
                 story.append(Spacer(1, 15))
         
-        # Rodapé
+        # === RODAPÉ FORMAL DO RELATÓRIO ===
         story.append(Spacer(1, 30))
+        
+        # Assinatura digital
+        footer_data = [
+            ['', ''],
+            ['Documento gerado automaticamente pelo', ''],
+            ['Sistema EviChain v2.1', ''],
+            ['Blockchain para Evidências Digitais', ''],
+            ['', ''],
+            [f'Data/Hora de Geração: {datetime.now().strftime("%d/%m/%Y às %H:%M:%S")}', ''],
+            ['Este documento possui validade jurídica conforme', ''],
+            ['Lei 14.063/2020 (Marco Legal das Assinaturas Eletrônicas)', '']
+        ]
+        
+        footer_table = Table(footer_data, colWidths=[15*cm, 0*cm])
+        footer_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#6b7280')),
+            ('FONTNAME', (0, 2), (0, 2), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 2), (0, 2), 10),
+            ('TEXTCOLOR', (0, 2), (0, 2), colors.HexColor('#1f2937')),
+        ]))
+        story.append(footer_table)
+        
+        # Linha final
+        story.append(Spacer(1, 10))
+        final_line = Table([['_' * 80]], colWidths=[15*cm])
+        final_line.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 8),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#a0aec0'))
+        ]))
+        story.append(final_line)
         story.append(Paragraph("_" * 80, styles['Normal']))
         story.append(Paragraph("Documento gerado automaticamente pelo sistema EviChain", styles['Italic']))
         
