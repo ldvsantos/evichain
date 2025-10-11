@@ -427,6 +427,219 @@ def buscar_redes_sociais():
             'error': str(e)
         }), 500
 
+@app.route('/api/search', methods=['GET'])
+def search_complaints():
+    """Busca denúncias na blockchain por termo de pesquisa"""
+    try:
+        query = request.args.get('query', '').strip()
+        
+        if not query:
+            return jsonify({
+                'success': False,
+                'error': 'Parâmetro query é obrigatório'
+            }), 400
+        
+        print(f"[INFO] Buscando denúncias por: '{query}'")
+        
+        # Obter todas as denúncias da blockchain
+        complaints = evichain.get_all_complaints()
+        results = []
+        
+        # Buscar nos campos de texto das denúncias
+        search_fields = ['titulo', 'nomeDenunciado', 'descricao', 'conselho', 'categoria', 'assunto']
+        
+        for complaint in complaints:
+            match_found = False
+            match_details = []
+            
+            # Buscar em cada campo
+            for field in search_fields:
+                field_value = str(complaint.get(field, '')).lower()
+                if query.lower() in field_value:
+                    match_found = True
+                    match_details.append(f"{field}: {query}")
+            
+            # Buscar também na análise da IA se disponível
+            ia_analysis = complaint.get('ia_analysis', {})
+            if ia_analysis:
+                # Buscar no resumo
+                resumo = str(ia_analysis.get('analise_basica', {}).get('resumo', '')).lower()
+                if query.lower() in resumo:
+                    match_found = True
+                    match_details.append("análise_ia: resumo")
+                
+                # Buscar nas palavras-chave
+                palavras_chave = ia_analysis.get('analise_basica', {}).get('palavras_chave', [])
+                for palavra in palavras_chave:
+                    if query.lower() in str(palavra).lower():
+                        match_found = True
+                        match_details.append("análise_ia: palavra_chave")
+                        break
+            
+            if match_found:
+                # Adicionar informações do resultado
+                result = {
+                    'complaint_id': complaint.get('complaint_id', 'N/A'),
+                    'titulo': complaint.get('titulo', 'N/A'),
+                    'nomeDenunciado': complaint.get('nomeDenunciado', 'N/A'),
+                    'conselho': complaint.get('conselho', 'N/A'),
+                    'categoria': complaint.get('categoria', 'N/A'),
+                    'timestamp': complaint.get('timestamp', 'N/A'),
+                    'match_details': match_details,
+                    'risk_level': ia_analysis.get('classificacao_risco', {}).get('nivel', 'N/A'),
+                    'risk_score': ia_analysis.get('classificacao_risco', {}).get('pontuacao', 0)
+                }
+                results.append(result)
+        
+        # Ordenar por pontuação de risco (maior primeiro) e depois por timestamp
+        results.sort(key=lambda x: (x.get('risk_score', 0), x.get('timestamp', '')), reverse=True)
+        
+        print(f"[INFO] Encontrados {len(results)} resultados para '{query}'")
+        
+        return jsonify({
+            'success': True,
+            'results': results,
+            'total': len(results),
+            'query': query
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Erro na busca de denúncias: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/search-by-professional', methods=['GET'])
+def search_by_professional():
+    """Busca específica por nome de profissional"""
+    try:
+        name = request.args.get('name', '').strip()
+        
+        if not name:
+            return jsonify({
+                'success': False,
+                'error': 'Parâmetro name é obrigatório'
+            }), 400
+        
+        print(f"[INFO] Buscando profissional: '{name}'")
+        
+        complaints = evichain.get_all_complaints()
+        results = []
+        
+        for complaint in complaints:
+            # Buscar especificamente no campo nomeDenunciado
+            nome_denunciado = str(complaint.get('nomeDenunciado', '')).lower()
+            
+            # Buscar também na descrição por nomes
+            descricao = str(complaint.get('descricao', '')).lower()
+            
+            if (name.lower() in nome_denunciado or 
+                name.lower() in descricao):
+                
+                result = {
+                    'complaint_id': complaint.get('complaint_id', 'N/A'),
+                    'titulo': complaint.get('titulo', 'N/A'),
+                    'nomeDenunciado': complaint.get('nomeDenunciado', 'N/A'),
+                    'conselho': complaint.get('conselho', 'N/A'),
+                    'categoria': complaint.get('categoria', 'N/A'),
+                    'timestamp': complaint.get('timestamp', 'N/A'),
+                    'risk_level': complaint.get('ia_analysis', {}).get('classificacao_risco', {}).get('nivel', 'N/A'),
+                    'risk_score': complaint.get('ia_analysis', {}).get('classificacao_risco', {}).get('pontuacao', 0)
+                }
+                results.append(result)
+        
+        results.sort(key=lambda x: x.get('risk_score', 0), reverse=True)
+        
+        return jsonify({
+            'success': True,
+            'results': results,
+            'total': len(results),
+            'professional_name': name
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] Erro na busca por profissional: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/search-by-council', methods=['GET'])
+def search_by_council():
+    """Busca específica por conselho profissional"""
+    try:
+        council = request.args.get('council', '').strip()
+        
+        if not council:
+            return jsonify({
+                'success': False,
+                'error': 'Parâmetro council é obrigatório'
+            }), 400
+        
+        complaints = evichain.get_all_complaints()
+        results = []
+        
+        for complaint in complaints:
+            if council.upper() in str(complaint.get('conselho', '')).upper():
+                result = {
+                    'complaint_id': complaint.get('complaint_id', 'N/A'),
+                    'titulo': complaint.get('titulo', 'N/A'),
+                    'nomeDenunciado': complaint.get('nomeDenunciado', 'N/A'),
+                    'conselho': complaint.get('conselho', 'N/A'),
+                    'categoria': complaint.get('categoria', 'N/A'),
+                    'timestamp': complaint.get('timestamp', 'N/A')
+                }
+                results.append(result)
+        
+        return jsonify({
+            'success': True,
+            'results': results,
+            'total': len(results),
+            'council': council
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    """Retorna estatísticas básicas do sistema"""
+    try:
+        complaints = evichain.get_all_complaints()
+        
+        total_complaints = len(complaints)
+        total_blocks = len(evichain.chain)
+        
+        # Contar por conselho
+        councils = {}
+        categories = {}
+        
+        for complaint in complaints:
+            conselho = complaint.get('conselho', 'N/A')
+            categoria = complaint.get('categoria', 'N/A')
+            
+            councils[conselho] = councils.get(conselho, 0) + 1
+            categories[categoria] = categories.get(categoria, 0) + 1
+        
+        return jsonify({
+            'success': True,
+            'total_complaints': total_complaints,
+            'total_blocks': total_blocks,
+            'councils': councils,
+            'categories': categories
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/api/analytics', methods=['GET'])
 def get_analytics():
     """Retorna estatísticas analíticas das denúncias"""
