@@ -34,3 +34,24 @@ node_modules/
 # Coverage
 htmlcov/
 .coverage*
+
+# Arquivos de teste e debug temporários
+teste_*.py
+debug_*.py
+relatorio_*.py
+*_backup.*
+confef_resultado.html
+confef_sample.html
+resultado_*.json
+resumo_*.py
+testar_*.py
+investigar_*.py
+validar_*.py
+verificar_*.py
+implementar_*.py
+analisar_*.py
+corrigir_*.py
+
+# Arquivos temporários específicos do projeto
+PROBLEMA_CACHE_PYTHON.txt
+LIMPAR_CACHE_E_INICIAR.bat

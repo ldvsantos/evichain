@@ -505,7 +505,7 @@ def generate_pdf():
         finalidade = data.get('finalidade', 'N/A')
         conselho = data.get('conselho', 'N/A')
         categoria = data.get('categoria', 'N/A')
-        timestamp = data.get('timestamp', datetime.datetime.now().isoformat())
+        timestamp = data.get('timestamp', datetime.now().isoformat())
         codigosAnteriores = data.get('codigosAnteriores')
         ouvidoriaAnonima = data.get('ouvidoriaAnonima', False)
         anonymous = data.get('anonymous', False)
@@ -518,7 +518,6 @@ def generate_pdf():
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import inch
         from io import BytesIO
-        import datetime
         
         # Criar documento PDF em memória
         buffer = BytesIO()
@@ -563,9 +562,8 @@ def generate_pdf():
         
         # Formatar data
         try:
-            from datetime import datetime as dt
             if timestamp:
-                data_formatada = dt.fromisoformat(timestamp.replace('Z', '+00:00')).strftime('%d/%m/%Y %H:%M')
+                data_formatada = datetime.fromisoformat(timestamp.replace('Z', '+00:00')).strftime('%d/%m/%Y %H:%M')
             else:
                 data_formatada = 'N/A'
         except:
@@ -590,24 +588,109 @@ def generate_pdf():
         story.append(Paragraph(descricao, styles['Normal']))
         story.append(Spacer(1, 20))
         
-        # Análise da IA
+        # Análise da IA - Completa e Detalhada
         if ia_analysis:
             story.append(Paragraph("ANÁLISE DA INTELIGÊNCIA ARTIFICIAL", heading_style))
+            story.append(Spacer(1, 10))
+            
+            # Informações básicas da análise
+            analise_juridica = ia_analysis.get('analise_juridica', {})
+            classificacao_risco = ia_analysis.get('classificacao_risco', {})
+            analise_basica = ia_analysis.get('analise_basica', {})
+            
+            if analise_juridica.get('gravidade'):
+                story.append(Paragraph(f"<b>Gravidade:</b> {analise_juridica['gravidade']}", styles['Normal']))
+            
+            if analise_juridica.get('tipificacao'):
+                story.append(Paragraph(f"<b>Tipificação:</b> {analise_juridica['tipificacao']}", styles['Normal']))
+            
+            if classificacao_risco.get('nivel') and classificacao_risco.get('pontuacao'):
+                nivel = classificacao_risco['nivel']
+                pontuacao = classificacao_risco['pontuacao']
+                story.append(Paragraph(f"<b>Nível de Risco:</b> {nivel} ({pontuacao}/100)", styles['Normal']))
+            
+            if classificacao_risco.get('acao_recomendada'):
+                story.append(Paragraph(f"<b>Ação Recomendada:</b> {classificacao_risco['acao_recomendada']}", styles['Normal']))
             
             if 'classificacao' in ia_analysis:
                 story.append(Paragraph(f"<b>Classificação:</b> {ia_analysis['classificacao']}", styles['Normal']))
             
-            if 'gravidade' in ia_analysis:
-                story.append(Paragraph(f"<b>Gravidade:</b> {ia_analysis['gravidade']}", styles['Normal']))
+            story.append(Spacer(1, 12))
             
-            if 'analise_detalhada' in ia_analysis:
+            # Resumo da análise
+            if analise_basica.get('resumo'):
+                story.append(Paragraph("<b>Resumo da Análise:</b>", styles['Normal']))
+                story.append(Paragraph(analise_basica['resumo'], styles['Normal']))
+                story.append(Spacer(1, 12))
+            
+            if analise_juridica.get('fundamentacao'):
                 story.append(Paragraph("<b>Análise Detalhada:</b>", styles['Normal']))
-                story.append(Paragraph(ia_analysis['analise_detalhada'], styles['Normal']))
+                story.append(Paragraph(analise_juridica['fundamentacao'], styles['Normal']))
+                story.append(Spacer(1, 12))
             
-            if 'recomendacoes' in ia_analysis:
-                story.append(Paragraph("<b>Recomendações:</b>", styles['Normal']))
-                for rec in ia_analysis['recomendacoes']:
-                    story.append(Paragraph(f"• {rec}", styles['Normal']))
+            # Legislação Recomendada
+            legislacao_especifica = analise_juridica.get('legislacao_especifica', {})
+            if legislacao_especifica:
+                story.append(Paragraph("LEGISLAÇÃO RECOMENDADA PELA IA", heading_style))
+                
+                if legislacao_especifica.get('legislacao_sugerida'):
+                    story.append(Paragraph(f"<b>Legislação Sugerida:</b> {legislacao_especifica['legislacao_sugerida']}", styles['Normal']))
+                
+                if legislacao_especifica.get('conselho'):
+                    story.append(Paragraph(f"<b>Conselho:</b> {legislacao_especifica['conselho']}", styles['Normal']))
+                
+                if legislacao_especifica.get('tipo'):
+                    story.append(Paragraph(f"<b>Tipo de Infração:</b> {legislacao_especifica['tipo']}", styles['Normal']))
+                
+                if legislacao_especifica.get('descricao'):
+                    story.append(Paragraph(f"<b>Descrição:</b> {legislacao_especifica['descricao']}", styles['Normal']))
+                
+                if legislacao_especifica.get('artigos'):
+                    artigos = legislacao_especifica['artigos']
+                    if isinstance(artigos, list):
+                        artigos = ' '.join(artigos)
+                    story.append(Paragraph(f"<b>Artigos:</b> {artigos}", styles['Normal']))
+                
+                if legislacao_especifica.get('penalidades'):
+                    penalidades = legislacao_especifica['penalidades']
+                    if isinstance(penalidades, list):
+                        penalidades = ', '.join(penalidades)
+                    story.append(Paragraph(f"<b>Penalidades:</b> {penalidades}", styles['Normal']))
+                
+                story.append(Spacer(1, 12))
+            
+            # Palavras-chave identificadas
+            palavras_chave = analise_basica.get('palavras_chave', [])
+            if palavras_chave:
+                story.append(Paragraph("PALAVRAS-CHAVE IDENTIFICADAS", heading_style))
+                if isinstance(palavras_chave, list):
+                    for palavra in palavras_chave:
+                        story.append(Paragraph(f"• {palavra}", styles['Normal']))
+                else:
+                    story.append(Paragraph(palavras_chave, styles['Normal']))
+                story.append(Spacer(1, 12))
+            
+            # Recomendações
+            recomendacoes = ia_analysis.get('recomendacoes', [])
+            if recomendacoes:
+                story.append(Paragraph("RECOMENDAÇÕES", heading_style))
+                if isinstance(recomendacoes, list):
+                    for rec in recomendacoes:
+                        story.append(Paragraph(f"• {rec}", styles['Normal']))
+                else:
+                    story.append(Paragraph(recomendacoes, styles['Normal']))
+                story.append(Spacer(1, 12))
+            
+            # Informações adicionais de risco
+            if classificacao_risco.get('pontuacao'):
+                story.append(Paragraph(f"<b>Pontuação de Risco:</b> {classificacao_risco['pontuacao']}/100", styles['Normal']))
+            
+            # Fatores de risco
+            fatores_risco = classificacao_risco.get('fatores_risco', [])
+            if fatores_risco and isinstance(fatores_risco, list):
+                story.append(Paragraph("<b>Fatores de Risco:</b>", styles['Normal']))
+                for fator in fatores_risco:
+                    story.append(Paragraph(f"• {fator}", styles['Normal']))
             
             story.append(Spacer(1, 20))
         
@@ -615,54 +698,85 @@ def generate_pdf():
         investigacao = ia_analysis.get('investigacao_automatica', {}) if ia_analysis else {}
         if investigacao:
             story.append(Paragraph("INVESTIGAÇÃO AUTOMÁTICA REALIZADA", heading_style))
+            story.append(Spacer(1, 10))
             
-            # Relatório de detecção
+            # Relatório de detecção formatado
             if 'relatorio_deteccao' in investigacao:
-                story.append(Paragraph("<b>Relatório de Detecção:</b>", styles['Normal']))
-                story.append(Paragraph(investigacao['relatorio_deteccao'], styles['Normal']))
-                story.append(Spacer(1, 10))
+                story.append(Paragraph("Relatório de Detecção de Profissionais", heading_style))
+                
+                deteccao = investigacao.get('deteccao_nomes', {})
+                
+                # Estatísticas gerais
+                if deteccao.get('confiabilidade_geral') is not None:
+                    story.append(Paragraph(f"<b>Confiabilidade Geral:</b> {deteccao.get('confiabilidade_geral', 0)}%", styles['Normal']))
+                
+                if deteccao.get('contexto_profissional') is not None:
+                    contexto = "SIM" if deteccao.get('contexto_profissional') else "NÃO"
+                    story.append(Paragraph(f"<b>Contexto Profissional Detectado:</b> {contexto}", styles['Normal']))
+                
+                if deteccao.get('recomenda_investigacao') is not None:
+                    recomenda = "SIM" if deteccao.get('recomenda_investigacao') else "NÃO"
+                    story.append(Paragraph(f"<b>Recomenda Investigação:</b> {recomenda}", styles['Normal']))
+                
+                story.append(Spacer(1, 15))
             
-            # Profissionais identificados
+            # Profissionais identificados de forma organizada
             deteccao = investigacao.get('deteccao_nomes', {})
             if deteccao.get('nomes_detectados'):
-                story.append(Paragraph("<b>Profissionais Identificados:</b>", styles['Normal']))
-                for nome in deteccao['nomes_detectados']:
-                    story.append(Paragraph(f"• <b>{nome.get('nome_detectado', 'N/A')}</b> (Confiabilidade: {nome.get('confiabilidade', 0)}%)", styles['Normal']))
-                    story.append(Paragraph(f"  Contexto: {nome.get('contexto_encontrado', 'N/A')}", styles['Normal']))
-                story.append(Spacer(1, 10))
+                story.append(Paragraph("Profissionais Identificados", heading_style))
+                
+                for i, nome in enumerate(deteccao['nomes_detectados'], 1):
+                    # Cabeçalho do profissional
+                    nome_profissional = nome.get('nome_detectado', f'Profissional {i}')
+                    confiabilidade = nome.get('confiabilidade', 0)
+                    
+                    story.append(Paragraph(f"<b>{i}. {nome_profissional}</b>", styles['Normal']))
+                    story.append(Paragraph(f"   • Confiabilidade: {confiabilidade}%", styles['Normal']))
+                    
+                    contexto = nome.get('contexto_encontrado', 'Contexto não disponível')
+                    story.append(Paragraph(f"   • Contexto: {contexto}", styles['Normal']))
+                    story.append(Spacer(1, 8))
+                
+                story.append(Spacer(1, 15))
             
-            # Resultados das investigações
+            # Resultados das investigações de forma organizada
             investigacoes = investigacao.get('investigacoes_realizadas', [])
             if investigacoes:
-                story.append(Paragraph("<b>Resultados das Investigações:</b>", styles['Normal']))
-                for inv in investigacoes:
-                    story.append(Paragraph(f"<b>Investigado:</b> {inv.get('nome_investigado', 'N/A')}", styles['Normal']))
+                story.append(Paragraph("Resultados das Investigações Detalhadas", heading_style))
+                
+                for i, inv in enumerate(investigacoes, 1):
+                    nome_investigado = inv.get('nome_investigado', f'Investigação {i}')
+                    story.append(Paragraph(f"<b>{i}. Investigação: {nome_investigado}</b>", styles['Normal']))
                     
                     resultado = inv.get('resultado_investigacao', {})
                     registros = resultado.get('registros_oficiais', {})
                     
                     if registros.get('registro_encontrado'):
-                        story.append(Paragraph("Status: REGISTRO ENCONTRADO", styles['Normal']))
+                        story.append(Paragraph("   • <b>Status:</b> REGISTRO ENCONTRADO ✓", styles['Normal']))
+                        
                         dados_prof = registros.get('dados_profissional', {})
                         if dados_prof.get('nome_completo_oficial'):
-                            story.append(Paragraph(f"• Nome Oficial: {dados_prof['nome_completo_oficial']}", styles['Normal']))
+                            story.append(Paragraph(f"   • <b>Nome Oficial:</b> {dados_prof['nome_completo_oficial']}", styles['Normal']))
+                        
                         if dados_prof.get('registro_crm_completo') or dados_prof.get('registro_completo'):
                             registro = dados_prof.get('registro_crm_completo') or dados_prof.get('registro_completo')
-                            story.append(Paragraph(f"• Registro: {registro}", styles['Normal']))
+                            story.append(Paragraph(f"   • <b>Registro:</b> {registro}", styles['Normal']))
+                        
                         if dados_prof.get('situacao_registro'):
-                            story.append(Paragraph(f"• Situação: {dados_prof['situacao_registro']}", styles['Normal']))
-                        if dados_prof.get('tipo_formacao'):
-                            story.append(Paragraph(f"• Formação: {dados_prof['tipo_formacao']}", styles['Normal']))
+                            story.append(Paragraph(f"   • <b>Situação:</b> {dados_prof['situacao_registro']}", styles['Normal']))
+                        
+                        if dados_prof.get('especialidades'):
+                            especialidades = ', '.join(dados_prof['especialidades'])
+                            story.append(Paragraph(f"   • <b>Especialidades:</b> {especialidades}", styles['Normal']))
+                            
                     else:
-                        story.append(Paragraph("Status: BUSCA REALIZADA", styles['Normal']))
+                        story.append(Paragraph("   • <b>Status:</b> REGISTRO NÃO ENCONTRADO ✗", styles['Normal']))
+                        if resultado.get('motivo_nao_encontrado'):
+                            story.append(Paragraph(f"   • <b>Motivo:</b> {resultado['motivo_nao_encontrado']}", styles['Normal']))
                     
-                    resumo = resultado.get('resumo_investigacao', {})
-                    if resumo.get('pontuacao_confiabilidade') is not None:
-                        story.append(Paragraph(f"• Confiabilidade: {resumo['pontuacao_confiabilidade']}/100", styles['Normal']))
-                    
-                    story.append(Spacer(1, 8))
-            
-            story.append(Spacer(1, 20))
+                    story.append(Spacer(1, 12))
+                
+                story.append(Spacer(1, 15))
         
         # Rodapé
         story.append(Spacer(1, 30))
