@@ -14,6 +14,8 @@ import traceback
 from blockchain_simulator import EviChainBlockchain, generate_complaint_id
 from ia_engine_openai_padrao import IAEngineOpenAIPadrao
 from assistente_denuncia import AssistenteDenuncia
+from investigador_digital import InvestigadorDigital
+from consultor_registros import ConsultorRegistrosProfissionais
 
 def load_env():
     env_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -35,6 +37,8 @@ TRACE_BUFFER = deque(maxlen=120)
 
 # Inicializar componentes
 assistente = AssistenteDenuncia()
+investigador = InvestigadorDigital()
+consultor_registros = ConsultorRegistrosProfissionais()
 
 def log_trace(trace_id, stage, detail=""):
     timestamp = datetime.now().isoformat()
@@ -199,8 +203,10 @@ def submit_complaint():
 @app.route('/api/complaints', methods=['GET'])
 def get_complaints():
     try:
-        return jsonify({"success": True, "complaints": evichain.get_all_complaints()})
+        complaints = evichain.get_all_complaints()
+        return jsonify({"success": True, "complaints": complaints})
     except Exception as e:
+        print(f"[ERROR] Erro ao obter denúncias: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/blockchain-info', methods=['GET'])
@@ -245,6 +251,239 @@ def analisar_com_assistente():
     except Exception as e:
         print(f"[ERROR] Erro ao analisar com assistente: {e}")
         traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/registros/consultar', methods=['POST'])
+def consultar_registro_profissional():
+    """Endpoint específico para consulta detalhada de registros profissionais"""
+    try:
+        data = request.json
+        nome = data.get('nome', '').strip()
+        registro = data.get('registro', '').strip()
+        conselho = data.get('conselho', '').strip()
+        
+        if not nome:
+            return jsonify({
+                'success': False,
+                'error': 'Nome do profissional é obrigatório'
+            }), 400
+        
+        print(f"[INFO] Consultando registro profissional: {nome} - {conselho} - {registro}")
+        
+        # Realizar consulta detalhada
+        resultado_consulta = consultor_registros.consultar_registro_completo(
+            nome=nome,
+            registro=registro,
+            conselho=conselho
+        )
+        
+        # Se encontrou registro, extrair formação
+        if resultado_consulta.get("registro_encontrado") and resultado_consulta.get("dados_profissional"):
+            formacao_info = consultor_registros.extrair_formacao_e_especialidades(
+                resultado_consulta["dados_profissional"],
+                conselho or "GENERICO"
+            )
+            resultado_consulta["formacao_detalhada"] = formacao_info
+        
+        # Gerar relatório
+        relatorio = consultor_registros.gerar_relatorio_registro(resultado_consulta)
+        
+        print(f"[SUCCESS] Consulta concluída - Registro encontrado: {resultado_consulta.get('registro_encontrado', False)}")
+        
+        return jsonify({
+            'success': True,
+            'consulta': resultado_consulta,
+            'relatorio': relatorio,
+            'encontrado': resultado_consulta.get('registro_encontrado', False)
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Erro na consulta de registro: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/investigacao/iniciar', methods=['POST'])
+def iniciar_investigacao():
+    """Endpoint para iniciar investigação digital de um profissional"""
+    try:
+        data = request.json
+        nome = data.get('nome', '').strip()
+        registro = data.get('registro', '').strip()
+        conselho = data.get('conselho', '').strip()
+        informacoes_adicionais = data.get('informacoes_adicionais', {})
+        
+        if not nome:
+            return jsonify({
+                'success': False,
+                'error': 'Nome do profissional é obrigatório'
+            }), 400
+        
+        print(f"[INFO] Iniciando investigação digital para: {nome}")
+        
+        # Realizar investigação completa
+        resultado_investigacao = investigador.investigar_completo(
+            nome=nome,
+            registro_profissional=registro,
+            conselho=conselho,
+            informacoes_adicionais=informacoes_adicionais
+        )
+        
+        print(f"[SUCCESS] Investigação concluída para {nome}")
+        
+        return jsonify({
+            'success': True,
+            'investigacao': resultado_investigacao
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Erro durante investigação: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/investigacao/relatorio/<formato>', methods=['POST'])
+def gerar_relatorio_investigacao(formato):
+    """Endpoint para gerar relatório de investigação em diferentes formatos"""
+    try:
+        data = request.json
+        dados_investigacao = data.get('dados_investigacao')
+        
+        if not dados_investigacao:
+            return jsonify({
+                'success': False,
+                'error': 'Dados de investigação são obrigatórios'
+            }), 400
+        
+        if formato not in ['json', 'html', 'txt']:
+            return jsonify({
+                'success': False,
+                'error': 'Formato deve ser: json, html ou txt'
+            }), 400
+        
+        relatorio = investigador.gerar_relatorio_investigacao(dados_investigacao, formato)
+        
+        if formato == 'json':
+            return jsonify({
+                'success': True,
+                'relatorio': json.loads(relatorio),
+                'formato': 'json'
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'relatorio': relatorio,
+                'formato': formato
+            })
+    
+    except Exception as e:
+        print(f"[ERROR] Erro ao gerar relatório: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/investigacao/buscar-redes-sociais', methods=['POST'])
+def buscar_redes_sociais():
+    """Endpoint específico para busca em redes sociais"""
+    try:
+        data = request.json
+        nome = data.get('nome', '').strip()
+        
+        if not nome:
+            return jsonify({
+                'success': False,
+                'error': 'Nome é obrigatório'
+            }), 400
+        
+        print(f"[INFO] Buscando redes sociais para: {nome}")
+        
+        # Buscar apenas redes sociais
+        redes_sociais = investigador._investigar_redes_sociais(nome)
+        
+        return jsonify({
+            'success': True,
+            'redes_sociais': redes_sociais
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Erro na busca de redes sociais: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/api/analytics', methods=['GET'])
+def get_analytics():
+    """Retorna estatísticas analíticas das denúncias"""
+    try:
+        complaints = evichain.get_all_complaints()
+        
+        total_complaints = len(complaints)
+        pending_complaints = len([c for c in complaints if c.get('status', 'pending') == 'pending'])
+        resolved_complaints = total_complaints - pending_complaints
+        
+        # Cálculo simples do tempo médio de resolução (em horas)
+        average_resolution_time = 24  # Valor padrão para demonstração
+        
+        return jsonify({
+            'totalComplaints': total_complaints,
+            'pendingComplaints': pending_complaints,
+            'resolvedComplaints': resolved_complaints,
+            'averageResolutionTime': f'{average_resolution_time}h'
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Erro ao obter analytics: {e}")
+        return jsonify({
+            'totalComplaints': 0,
+            'pendingComplaints': 0,
+            'resolvedComplaints': 0,
+            'averageResolutionTime': '0h'
+        }), 500
+
+@app.route('/api/latest-analysis', methods=['GET'])
+def get_latest_analysis():
+    """Retorna a análise mais recente de denúncia"""
+    try:
+        complaints = evichain.get_all_complaints()
+        
+        if not complaints:
+            return jsonify({
+                'success': False,
+                'error': 'Nenhuma denúncia encontrada'
+            }), 404
+        
+        # Pega a denúncia mais recente com análise de IA
+        latest_complaint = None
+        for complaint in reversed(complaints):
+            if complaint.get('ia_analysis'):
+                latest_complaint = complaint
+                break
+        
+        if not latest_complaint:
+            return jsonify({
+                'success': False,
+                'error': 'Nenhuma análise de IA encontrada'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'complaint_id': latest_complaint.get('id', 'N/A'),
+            'full_analysis': latest_complaint.get('ia_analysis', {})
+        })
+    
+    except Exception as e:
+        print(f"[ERROR] Erro ao obter última análise: {e}")
         return jsonify({
             'success': False,
             'error': str(e)

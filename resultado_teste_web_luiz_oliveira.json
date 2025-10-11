@@ -1,0 +1,199 @@
+{
+  "investigacao": {
+    "alertas_e_bandeiras": [
+      {
+        "descricao": "Encontrados 6 perfis em redes sociais - verificar autenticidade",
+        "nivel": "medio",
+        "tipo": "multiplos_perfis"
+      },
+      {
+        "descricao": "Registro profissional não encontrado nos sistemas oficiais",
+        "nivel": "alto",
+        "tipo": "registro_nao_encontrado"
+      }
+    ],
+    "busca_geral": {
+      "artigos_academicos": {
+        "google_scholar": "https://scholar.google.com/scholar?q=Luiz%20Oliveira%20dos%20Santos",
+        "lattes": "http://lattes.cnpq.br/web/dgp/consulta-simples?termo=Luiz%20Oliveira%20dos%20Santos",
+        "pubmed": "https://pubmed.ncbi.nlm.nih.gov/?term=Luiz%20Oliveira%20dos%20Santos",
+        "status": "busca_manual_necessaria"
+      },
+      "diretorios_profissionais": {
+        "doctoralia": "https://www.doctoralia.com.br/buscar?q=Luiz%20Oliveira%20dos%20Santos",
+        "paginas_amarelas": "https://www.paginasamarelas.com.br/buscar/Luiz%20Oliveira%20dos%20Santos",
+        "status": "busca_manual_necessaria",
+        "viva_local": "https://www.vivalocal.com/brasil/buscar?q=Luiz%20Oliveira%20dos%20Santos"
+      },
+      "google_search": {
+        "busca_manual": "https://www.google.com/search?q=Luiz%20Oliveira%20dos%20Santos%20",
+        "status": "busca_manual_necessaria"
+      },
+      "noticias": {
+        "estadao": "https://www.estadao.com.br/buscar/?q=Luiz%20Oliveira%20dos%20Santos",
+        "folha": "https://search.folha.uol.com.br/?q=Luiz%20Oliveira%20dos%20Santos",
+        "globo": "https://g1.globo.com/busca/?q=Luiz%20Oliveira%20dos%20Santos",
+        "google_news": "https://news.google.com/search?q=Luiz%20Oliveira%20dos%20Santos",
+        "status": "busca_manual_necessaria"
+      }
+    },
+    "dados_basicos": {
+      "conselho": "CONFEF",
+      "investigador": "EviChain Digital",
+      "nome": "Luiz Oliveira dos Santos",
+      "registro": "",
+      "timestamp_investigacao": "2025-10-10T23:30:12.317913"
+    },
+    "historico_sancoes": {
+      "portal_transparencia": {
+        "cgu": "https://portaldatransparencia.gov.br/busca?termo=Luiz%20Oliveira%20dos%20Santos",
+        "status": "busca_manual_necessaria",
+        "tcu": "https://contas.tcu.gov.br/pessoaFisica/"
+      },
+      "processos_judiciais": {
+        "observacao": "Buscar por nome do profissional",
+        "status": "busca_manual_necessaria",
+        "tjrj": "https://www3.tjrj.jus.br/consultaprocessual/",
+        "tjsp": "https://esaj.tjsp.jus.br/cjsg/consultaCompleta.do?f=1"
+      },
+      "sancoes_conselho": {},
+      "tribunal_contas": {}
+    },
+    "informacoes_profissionais": {
+      "associacoes": [],
+      "especialidades": [],
+      "locais_trabalho": [],
+      "titulacao": []
+    },
+    "redes_sociais": {
+      "facebook": {
+        "metodo": "busca_publica",
+        "perfis_encontrados": [
+          {
+            "metodo": "busca_manual_necessaria",
+            "observacao": "Buscar manualmente por 'Luiz Oliveira dos Santos' no Facebook",
+            "url_busca": "https://www.facebook.com/search/people/?q=Luiz%20Oliveira%20dos%20Santos"
+          }
+        ],
+        "plataforma": "Facebook",
+        "status": "pesquisado"
+      },
+      "instagram": {
+        "busca_manual": "https://www.instagram.com/explore/search/keyword/?q=Luiz%20Oliveira%20dos%20Santos",
+        "perfis_encontrados": [
+          {
+            "status": "perfil_existe",
+            "url": "https://www.instagram.com/luizoliveiradossantos/",
+            "username": "luizoliveiradossantos",
+            "verificacao": "automatica"
+          },
+          {
+            "status": "perfil_existe",
+            "url": "https://www.instagram.com/luizoliveiradossantos/",
+            "username": "luizoliveiradossantos",
+            "verificacao": "automatica"
+          },
+          {
+            "status": "perfil_existe",
+            "url": "https://www.instagram.com/drluizoliveiradossantos/",
+            "username": "drluizoliveiradossantos",
+            "verificacao": "automatica"
+          },
+          {
+            "status": "perfil_existe",
+            "url": "https://www.instagram.com/draluizoliveiradossantos/",
+            "username": "draluizoliveiradossantos",
+            "verificacao": "automatica"
+          },
+          {
+            "status": "perfil_existe",
+            "url": "https://www.instagram.com/luizoliveiradossantosoficial/",
+            "username": "luizoliveiradossantosoficial",
+            "verificacao": "automatica"
+          }
+        ],
+        "plataforma": "Instagram",
+        "status": "pesquisado"
+      },
+      "linkedin": {
+        "busca_manual": "https://www.linkedin.com/search/results/people/?keywords=Luiz%20Oliveira%20dos%20Santos",
+        "observacao": "Busca manual necessária no LinkedIn",
+        "perfis_encontrados": [],
+        "plataforma": "LinkedIn",
+        "status": "pesquisado"
+      },
+      "outras_redes": [
+        {
+          "nome": "Telegram",
+          "url": "https://t.me/luizoliveiradossantos"
+        },
+        {
+          "busca": "Verificar diretórios comerciais",
+          "nome": "WhatsApp Business"
+        },
+        {
+          "busca": "Busca manual necessária",
+          "nome": "Clubhouse"
+        },
+        {
+          "nome": "Pinterest",
+          "url": "https://pinterest.com/search/users/?q=Luiz%20Oliveira%20dos%20Santos"
+        },
+        {
+          "nome": "Twitch",
+          "url": "https://www.twitch.tv/luizoliveiradossantos"
+        }
+      ],
+      "tiktok": {
+        "busca_manual": "https://www.tiktok.com/search/user?q=Luiz%20Oliveira%20dos%20Santos",
+        "plataforma": "TikTok",
+        "status": "busca_manual_necessaria"
+      },
+      "twitter": {
+        "busca_manual": "https://twitter.com/search?q=Luiz%20Oliveira%20dos%20Santos",
+        "perfis_encontrados": [],
+        "plataforma": "Twitter/X",
+        "status": "pesquisado"
+      },
+      "youtube": {
+        "busca_manual": "https://www.youtube.com/results?search_query=Luiz%20Oliveira%20dos%20Santos",
+        "plataforma": "YouTube",
+        "status": "busca_manual_necessaria"
+      }
+    },
+    "registros_oficiais": {
+      "busca_realizada": {
+        "conselho": "CONFEF",
+        "nome_pesquisado": "Luiz Oliveira dos Santos",
+        "registro_pesquisado": "",
+        "timestamp": "2025-10-10 23:30:12"
+      },
+      "dados_profissional": {},
+      "fontes_consultadas": [],
+      "observacoes": [
+        "Conselho CONFEF não implementado"
+      ],
+      "registro_encontrado": false,
+      "relatorio_consulta": "============================================================\n    RELATÓRIO DE CONSULTA DE REGISTRO PROFISSIONAL\n============================================================\n\nNome pesquisado: Luiz Oliveira dos Santos\nRegistro pesquisado: \nConselho: CONFEF\nData da consulta: 2025-10-10 23:30:12\n\n❌ REGISTRO NÃO ENCONTRADO\n------------------------------\nObservações:\n• Conselho CONFEF não implementado\n\n============================================================"
+    },
+    "resumo_investigacao": {
+      "pontuacao_confiabilidade": 0,
+      "principais_achados": [
+        "Presença confirmada em 2 redes sociais"
+      ],
+      "proximos_passos": [
+        "Documentar evidências coletadas",
+        "Realizar verificações manuais dos links fornecidos",
+        "Considerar contato direto com o profissional para esclarecimentos"
+      ],
+      "recomendacoes": [
+        "Investigação mais aprofundada recomendada devido aos alertas identificados",
+        "Verificar manualmente os links e perfis identificados",
+        "Cruzar informações com outras fontes disponíveis"
+      ],
+      "status_investigacao": "concluida",
+      "timestamp": "2025-10-10T23:30:14.099100"
+    }
+  },
+  "success": true
+}

@@ -1,118 +1,272 @@
-// Dashboard Principal - Sistema EviChain
-let complaintsData = [];
-let analyticsData = {};
+// =====================================================================
+// EviChain Dashboard - JavaScript (Versão Corrigida)
+// =====================================================================
 
-// Inicialização do dashboard
+// Variáveis globais para armazenar dados
+let complaintsData = [];
+let blockchainData = {};
+
+// Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard carregado. Iniciando carregamento de dados...');
     loadDashboardData();
-    loadLatestComplaintAnalysis();
+    
+    // Atualizar dados a cada 30 segundos
+    setInterval(loadDashboardData, 30000);
 });
 
+// Função principal para carregar todos os dados do dashboard
 async function loadDashboardData() {
     showLoading(true);
     
     try {
-        // Carregamento em paralelo de todas as informações
-        const [complaintsResponse, analyticsResponse] = await Promise.all([
-            fetch('/api/complaints'),
-            fetch('/api/analytics')
-        ]);
+        // Carregar dados das denúncias
+        await loadComplaints();
         
-        if (!complaintsResponse.ok || !analyticsResponse.ok) {
-            throw new Error('Erro ao carregar dados do servidor');
-        }
+        // Carregar informações da blockchain
+        await loadBlockchainInfo();
         
-        const complaintsResult = await complaintsResponse.json();
-        analyticsData = await analyticsResponse.json();
+        // Atualizar estatísticas
+        updateStatistics();
         
-        // Extrai o array de denúncias da resposta
-        if (complaintsResult.success && complaintsResult.complaints) {
-            complaintsData = complaintsResult.complaints;
-        } else {
-            complaintsData = [];
-        }
+        // Atualizar gráficos
+        updateCharts();
         
-        // Atualiza todas as seções
+        // Atualizar tabela de denúncias
         updateComplaintsTable();
-        updateAnalytics();
-        updateRecentTransactions();
+        
+        // Atualizar informações da blockchain
+        updateBlockchainInfo();
+        
+        // Carregar análise inteligente da última denúncia
+        await loadLatestComplaintAnalysis();
+        
+        console.log('Dados do dashboard carregados com sucesso');
         
     } catch (error) {
-        showError('Erro ao carregar dados: ' + error.message);
+        console.error('Erro ao carregar dados do dashboard:', error);
+        showError('Erro ao carregar dados. Verifique a conexão com o servidor.');
     } finally {
         showLoading(false);
     }
 }
 
-// Atualiza a tabela de denúncias
-function updateComplaintsTable() {
-    const tbody = document.getElementById('complaintsTableBody');
-    
-    if (!tbody) {
-        console.error('Elemento complaintsTableBody não encontrado!');
-        return;
+// Carregar denúncias da API
+async function loadComplaints() {
+    try {
+        const response = await fetch('/api/complaints');
+        const result = await response.json();
+        
+        // CORREÇÃO: Acessar a propriedade 'complaints' do objeto retornado
+        if (result.success && result.complaints) {
+            complaintsData = result.complaints;
+            console.log(`Carregadas ${complaintsData.length} denúncias`);
+        } else {
+            // Se 'complaints' não existir, usa um array vazio
+            complaintsData = [];
+            // Lança um erro se a requisição falhou
+            if (!result.success) {
+                throw new Error(result.error || 'Erro ao carregar denúncias');
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar denúncias:', error);
+        complaintsData = []; // Garante que a variável seja um array em caso de erro
     }
-    
-    tbody.innerHTML = '';
-    
-    if (!complaintsData || complaintsData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma denúncia encontrada</td></tr>';
-        return;
-    }
-    
-    complaintsData.forEach((complaint, index) => {
-        const row = document.createElement('tr');
-        
-        // Análise de IA
-        const iaAnalysis = complaint.ia_analysis || {};
-        const gravidade = iaAnalysis.analise_juridica?.gravidade || 'Não analisado';
-        const gravidadeBadge = getGravidadeBadgeClass(gravidade);
-        
-        row.innerHTML = `
-            <td><code>${complaint.id || 'N/A'}</code></td>
-            <td>${complaint.titulo || complaint.assunto || 'Sem título'}</td>
-            <td>
-                <span class="badge ${gravidadeBadge}">${gravidade}</span>
-            </td>
-            <td>${complaint.categoria || 'N/A'}</td>
-            <td>${formatDate(complaint.timestamp)}</td>
-            <td>
-                <span class="badge bg-primary">Registrada</span>
-            </td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="viewComplaintDetails('${complaint.id}')">
-                    <i class="fas fa-eye"></i> Ver Detalhes
-                </button>
-            </td>
-        `;
-        
-        tbody.appendChild(row);
-    });
 }
 
-// Atualiza métricas analíticas
-function updateAnalytics() {
-    const elements = {
-        'totalComplaints': document.getElementById('totalComplaints'),
-        'pendingComplaints': document.getElementById('pendingComplaints'),
-        'resolvedComplaints': document.getElementById('resolvedComplaints'),
-        'averageResolutionTime': document.getElementById('averageResolutionTime')
-    };
+// Carregar informações da blockchain
+async function loadBlockchainInfo() {
+    try {
+        const response = await fetch('/api/blockchain-info');
+        const result = await response.json();
+        
+        if (result.success) {
+            blockchainData = result;
+            console.log('Informações da blockchain carregadas');
+        } else {
+            throw new Error(result.error || 'Erro ao carregar blockchain');
+        }
+    } catch (error) {
+        console.error('Erro ao carregar blockchain:', error);
+        blockchainData = {};
+    }
+}
+
+// Atualizar estatísticas na parte superior
+function updateStatistics() {
+    // Total de denúncias
+    document.getElementById('totalComplaints').textContent = complaintsData.length;
     
-    Object.entries(elements).forEach(([key, element]) => {
-        if (element) {
-            element.textContent = analyticsData[key] || '0';
+    // Total de blocos
+    const totalBlocks = blockchainData.blockchain ? blockchainData.blockchain.length : 0;
+    document.getElementById('totalBlocks').textContent = totalBlocks;
+    
+    // Casos de alto risco (simulado)
+    const highRiskCases = complaintsData.filter(complaint => {
+        const iaAnalysis = complaint.ia_analysis || {};
+        return iaAnalysis.classificacao_risco?.nivel === 'ALTO';
+    }).length;
+    document.getElementById('highRiskCases').textContent = highRiskCases;
+}
+
+// Atualizar gráficos
+function updateCharts() {
+    updateConselhosChart();
+    updateCategoriasChart();
+}
+
+// Gráfico de denúncias por conselho
+function updateConselhosChart() {
+    const ctx = document.getElementById('conselhosChart');
+    if (!ctx) return;
+    
+    // Contar denúncias por conselho
+    const conselhoCount = {};
+    complaintsData.forEach(complaint => {
+        const conselho = complaint.conselho || 'Não especificado';
+        conselhoCount[conselho] = (conselhoCount[conselho] || 0) + 1;
+    });
+    
+    const labels = Object.keys(conselhoCount);
+    const data = Object.values(conselhoCount);
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
         }
     });
 }
 
-// Atualiza transações recentes
+// Gráfico de categorias de denúncias
+function updateCategoriasChart() {
+    const ctx = document.getElementById('categoriasChart');
+    if (!ctx) return;
+    
+    // Contar denúncias por categoria
+    const categoriaCount = {};
+    complaintsData.forEach(complaint => {
+        const categoria = complaint.categoria || 'Não especificado';
+        categoriaCount[categoria] = (categoriaCount[categoria] || 0) + 1;
+    });
+    
+    const labels = Object.keys(categoriaCount);
+    const data = Object.values(categoriaCount);
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Número de Denúncias',
+                data: data,
+                backgroundColor: '#3B82F6'
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Atualizar tabela de denúncias
+function updateComplaintsTable() {
+    const tbody = document.getElementById('complaintsTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (complaintsData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 20px;">
+                    Nenhuma denúncia encontrada
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // CORREÇÃO: Acessar os dados dentro da estrutura correta
+    complaintsData.forEach(complaint => {
+        const row = document.createElement('tr');
+        
+        // Formata a data para melhor leitura
+        const formattedDate = complaint.data ? new Date(complaint.data).toLocaleString('pt-BR') : 'N/A';
+
+        row.innerHTML = `
+            <td>${complaint.id || 'N/A'}</td>
+            <td>${complaint.conselho || 'N/A'}</td>
+            <td>${complaint.categoria || 'N/A'}</td>
+            <td>
+                <span class="risk-badge risk-medio">
+                    ${complaint.ia_analysis?.classificacao_risco?.nivel || 'Médio'}
+                </span>
+            </td>
+            <td>${formattedDate}</td>
+            <td>
+                <span class="status-badge status-registered">
+                    ${complaint.status || 'Registrado'}
+                </span>
+            </td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="viewComplaintDetails('${complaint.id}')">
+                    <i class="fas fa-eye"></i>
+                    Ver
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Atualizar informações da blockchain
+function updateBlockchainInfo() {
+    if (!blockchainData.blockchain) return;
+    
+    const chain = blockchainData.blockchain;
+    const latestBlock = chain[chain.length - 1];
+    
+    if (latestBlock) {
+        document.getElementById('latestBlockHash').textContent = latestBlock.hash || 'N/A';
+    }
+    
+    document.getElementById('difficulty').textContent = '2';
+    document.getElementById('pendingTransactions').textContent = '0';
+    document.getElementById('chainValid').textContent = '✓ Válida';
+    
+    // Atualizar lista de transações recentes
+    updateRecentTransactions();
+}
+
+// Atualizar transações recentes
 function updateRecentTransactions() {
     const container = document.getElementById('recentTransactions');
     if (!container) return;
     
     container.innerHTML = '';
     
+    // Pegar as últimas 5 denúncias
     const recentComplaints = complaintsData.slice(0, 5);
     
     if (recentComplaints.length === 0) {
@@ -147,6 +301,7 @@ function showLoading(show) {
 
 function showError(message) {
     console.error(message);
+    // Aqui você pode implementar uma notificação de erro mais elaborada
     alert(message);
 }
 
@@ -161,10 +316,6 @@ function exportReport() {
 
 function goBack() {
     window.location.href = '/';
-}
-
-function openInvestigationPage() {
-    window.location.href = '/investigador.html';
 }
 
 function viewComplaintDetails(complaintId) {
@@ -273,7 +424,7 @@ function viewComplaintDetails(complaintId) {
                     <div class="investigacao-item" style="background:#f3f4f6; border-radius:8px; padding:15px; margin:10px 0; border:1px solid #e1e5e9;">
                         <div style="display:flex; justify-content:between; align-items:center; margin-bottom:10px;">
                             <h6 style="color:#1976d2; margin:0;">🔎 ${inv.nome_investigado}</h6>
-                            <span class="badge" style="background:${registros.registro_encontrado ? '#4caf50' : '#ff9800'}; color:white; font-size:0.8em; padding:4px 8px; border-radius:4px;">
+                            <span class="badge" style="background:${registros.registro_encontrado ? '#4caf50' : '#ff9800'}; color:white; font-size:0.8em;">
                                 ${registros.registro_encontrado ? 'REGISTRO ENCONTRADO' : 'BUSCA REALIZADA'}
                             </span>
                         </div>
@@ -372,6 +523,23 @@ function viewComplaintDetails(complaintId) {
             ` : ''}
         </div>
     `;
+            <p><strong>Nível de Risco:</strong> ${iaAnalysis.classificacao_risco?.nivel || 'N/A'} (${iaAnalysis.classificacao_risco?.pontuacao || 0}/100)</p>
+            <p><strong>Ação Recomendada:</strong> ${iaAnalysis.classificacao_risco?.acao_recomendada || 'N/A'}</p>
+            <p><strong>Resumo:</strong> ${iaAnalysis.analise_basica?.resumo || 'Não disponível'}</p>
+            <p><strong>Legislação possível:</strong> ${iaAnalysis.analise_juridica?.legislacao_especifica?.legislacao_sugerida || 'N/A'}</p>
+            ${legislacaoHtml}
+            ${iaAnalysis.analise_basica?.palavras_chave?.length > 0 ? `
+            <h4>🔍 Palavras-Chave Identificadas</h4>
+            <p>${iaAnalysis.analise_basica.palavras_chave.join(', ')}</p>
+            ` : ''}
+            ${iaAnalysis.recomendacoes?.length > 0 ? `
+            <h4>💡 Recomendações</h4>
+            <ul>
+                ${iaAnalysis.recomendacoes.map(rec => `<li>${rec}</li>`).join('')}
+            </ul>
+            ` : ''}
+        </div>
+    `;
     
     modal.style.display = 'flex';
 }
@@ -389,11 +557,6 @@ window.onclick = function(event) {
     }
 }
 
-// Função para ver detalhes da investigação (será implementada quando necessário)
-function verDetalhesInvestigacao(nomeInvestigado, index) {
-    alert(`Ver detalhes completos da investigação para: ${nomeInvestigado}\nÍndice: ${index}`);
-    // Aqui você pode implementar um modal adicional ou expandir a seção
-}
 
 // Carrega análise inteligente da última denúncia
 async function loadLatestComplaintAnalysis() {

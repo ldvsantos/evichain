@@ -14,6 +14,9 @@ except ImportError:
     print("[WARN] Biblioteca openai não instalada. Use: pip install openai>=1.0.0")
 
 from ia_analisador_texto import AnalisadorTexto
+from detector_nomes import DetectorNomes
+from consultor_registros import ConsultorRegistrosProfissionais
+from investigador_digital import InvestigadorDigital
 
 
 class IAEngineOpenAIPadrao:
@@ -80,6 +83,13 @@ class IAEngineOpenAIPadrao:
         self.client = None
         self.legislacao: Dict[str, Any] = {}
         self.analisador = AnalisadorTexto()
+        
+        # Inicializar componentes de investigação automática
+        self.detector_nomes = DetectorNomes()
+        self.consultor_registros = ConsultorRegistrosProfissionais()
+        # Inicializar cache CONFEF com dados conhecidos
+        self.consultor_registros._inicializar_cache_confef()
+        self.investigador = InvestigadorDigital()
 
         # Carregar base de conhecimento legislativa
         self._carregar_legislacao()
@@ -179,13 +189,14 @@ class IAEngineOpenAIPadrao:
     def analisar_denuncia_completa(self, transaction_data: Dict[str, Any], trace_id: str = "N/A") -> Optional[Dict[str, Any]]:
         """
         Analisa a denúncia de forma completa usando OpenAI ou fallback local.
+        AGORA INCLUI DETECÇÃO AUTOMÁTICA DE NOMES E INVESTIGAÇÃO
         
         Args:
             transaction_data: Dados da transação/denúncia
             trace_id: ID de rastreamento
             
         Returns:
-            Dicionário com análise completa ou None em caso de erro
+            Dicionário com análise completa E investigação automática
         """
         descricao = transaction_data.get("descricao", "")
         conselho = transaction_data.get("conselho", "N/A")
@@ -194,15 +205,98 @@ class IAEngineOpenAIPadrao:
         if not descricao:
             return None
 
-        # Tentar análise com OpenAI
+        print(f"[INFO][{trace_id}] Iniciando análise completa com investigação automática")
+
+        # 1. ANÁLISE PRINCIPAL (OpenAI ou local)
+        analise_principal = None
         if self.client:
             try:
-                return self._analisar_com_openai(descricao, conselho, categoria, trace_id)
+                analise_principal = self._analisar_com_openai(descricao, conselho, categoria, trace_id)
             except Exception as exc:
                 print(f"[WARN][{trace_id}] Falha OpenAI: {exc}. Usando fallback.")
 
-        # Fallback: análise local
-        return self._analisar_local(descricao, conselho, categoria, trace_id)
+        if not analise_principal:
+            analise_principal = self._analisar_local(descricao, conselho, categoria, trace_id)
+
+        # 2. DETECÇÃO AUTOMÁTICA DE NOMES E PROFISSIONAIS
+        print(f"[INFO][{trace_id}] Detectando nomes no texto da denúncia...")
+        deteccao_nomes = self.detector_nomes.detectar_nomes_e_registros(descricao, conselho)
+        
+        # 3. INVESTIGAÇÃO AUTOMÁTICA DOS PROFISSIONAIS DETECTADOS
+        investigacoes_automaticas = []
+        if deteccao_nomes.get("recomendacao_investigacao", False):
+            print(f"[INFO][{trace_id}] Investigação automática recomendada - executando...")
+            
+            for nome_info in deteccao_nomes.get("nomes_detectados", []):
+                nome = nome_info["nome_detectado"]
+                print(f"[INFO][{trace_id}] Investigando automaticamente: {nome}")
+                
+                try:
+                    # Tentar determinar conselho baseado no registro associado ou contexto
+                    conselho_investigacao = conselho
+                    registro_investigacao = None
+                    
+                    if nome_info.get("registro_associado"):
+                        conselho_investigacao = nome_info["registro_associado"]["conselho"]
+                        registro_investigacao = nome_info["registro_associado"]["numero"]
+                    
+                    # Realizar investigação completa
+                    investigacao_resultado = self.investigador.investigar_completo(
+                        nome=nome,
+                        registro_profissional=registro_investigacao,
+                        conselho=conselho_investigacao,
+                        informacoes_adicionais={"fonte": "deteccao_automatica", "trace_id": trace_id}
+                    )
+                    
+                    investigacoes_automaticas.append({
+                        "nome_investigado": nome,
+                        "confiabilidade_deteccao": nome_info["confiabilidade"],
+                        "resultado_investigacao": investigacao_resultado,
+                        "timestamp_investigacao": datetime.now().isoformat()
+                    })
+                    
+                    print(f"[SUCCESS][{trace_id}] Investigação concluída para {nome}")
+                    
+                except Exception as e:
+                    print(f"[ERROR][{trace_id}] Erro na investigação de {nome}: {e}")
+                    investigacoes_automaticas.append({
+                        "nome_investigado": nome,
+                        "confiabilidade_deteccao": nome_info["confiabilidade"],
+                        "erro_investigacao": str(e),
+                        "timestamp_investigacao": datetime.now().isoformat()
+                    })
+
+        # 4. CONSOLIDAR RESULTADOS
+        analise_principal["investigacao_automatica"] = {
+            "deteccao_nomes": deteccao_nomes,
+            "total_investigacoes": len(investigacoes_automaticas),
+            "investigacoes_realizadas": investigacoes_automaticas,
+            "relatorio_deteccao": self.detector_nomes.gerar_relatorio_deteccao(deteccao_nomes)
+        }
+        
+        # 5. ATUALIZAR RECOMENDAÇÕES COM BASE NA INVESTIGAÇÃO
+        if investigacoes_automaticas:
+            if "recomendacoes" not in analise_principal:
+                analise_principal["recomendacoes"] = []
+            
+            analise_principal["recomendacoes"].append("✅ INVESTIGAÇÃO AUTOMÁTICA REALIZADA - Consultar seção de investigação para detalhes dos profissionais identificados")
+            
+            # Atualizar gravidade se encontrou registros suspensos/irregulares
+            for inv in investigacoes_automaticas:
+                resultado_inv = inv.get("resultado_investigacao", {})
+                registros = resultado_inv.get("registros_oficiais", {})
+                
+                if registros.get("registro_encontrado"):
+                    dados_prof = registros.get("dados_profissional", {})
+                    situacao = dados_prof.get("situacao_registro", "").lower()
+                    
+                    if "suspenso" in situacao or "cancelado" in situacao or "inativo" in situacao:
+                        analise_principal["classificacao_risco"]["nivel"] = "ALTO"
+                        analise_principal["classificacao_risco"]["pontuacao"] = min(100, analise_principal["classificacao_risco"].get("pontuacao", 50) + 30)
+                        analise_principal["recomendacoes"].append(f"⚠️ ALERTA: Profissional {inv['nome_investigado']} com registro {situacao.upper()}")
+
+        print(f"[SUCCESS][{trace_id}] Análise completa com investigação finalizada")
+        return analise_principal
 
     def _analisar_com_openai(self, descricao: str, conselho: str, categoria: str, trace_id: str) -> Dict[str, Any]:
         """Análise usando OpenAI."""

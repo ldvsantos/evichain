@@ -1,0 +1,119 @@
+<div vw class="enabled">
+  <div vw-access-button class="active"></div>
+  <div vw-plugin-wrapper>
+    <div class="vw-plugin-top-wrapper"></div>
+  </div>
+</div>
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script> 
+<script>
+	new window.VLibras.Widget('https://vlibras.gov.br/app');
+</script>
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--FONT-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Wix+Madefor+Display:wght@400..800&display=swap" rel="stylesheet">
+
+    <!--ICON-->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+
+    <!--SCROOL REVEAL-->
+    <script src="https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js"></script>
+
+    <!--CSS-->
+    <link rel="stylesheet" href="/confefv2/src/css/style.css">
+
+    <!--JS-->
+    <script src="/confefv2/src/js/main.js" defer></script>
+
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+
+    <!-- 
+        ##################
+        ### data tables ##
+        ##################
+         -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.1.1/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="/confef/css/custom_datatable.css">
+    <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.15/sorting/date-eu.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.1.1/js/dataTables.responsive.min.js"></script>
+
+    <!-- 
+        ######################
+        ### FIM data tables ##
+        ######################
+         -->
+
+    <style>
+
+    </style>
+    <title>CONFEF</title>
+</head>
+
+<body>
+    <div class="body-container">
+
+        <!--HEADER-->
+        <header>
+            <div class="header-wrapper container mx-auto flex justify-between items-center px-8">
+  <div class="header-logo"> <a href="https://www.confef.org.br/"><img src="/confefv2/src/assets/images/logo-confef.png" alt="Logo confef" srcset=""></a> </div>
+  <div class="header-wrapper-menu">
+    <button class="header-wrapper-menu-toggle"> <i class="ri-more-2-line"></i> </button>
+    <button class="header-wrapper-search-toggle" onclick="openSearchModal()"> <i class="ri-search-line"></i> </button>
+    <ul>
+      <!-- 1) <li> com o logo -->
+      <li class="info-logo-li text-nav_color hover:text-nav_color/80">
+        <a href="https://transparencia.confef.org.br/spw/PortalTransparencia/Consulta.aspx?CS=BRLJV7mtpFc=">
+          <img src="/confefv2/src/assets/images/logo_informacao.png"
+            style="width:100px; height:45px; object-fit:contain;">
+        </a>
+      </li>
+
+      <!-- 2) <li> com o texto, começa oculto -->
+      <li class="info-text-li text-nav_color font-bold hover:text-nav_color/80"
+        style="display:none;">
+        <a href="https://transparencia.confef.org.br/spw/PortalTransparencia/Consulta.aspx?CS=BRLJV7mtpFc=">
+          Acesso à Informação
+        </a>
+      </li>
+
+      <!-- restante do menu mantém igual -->
+      <li class="text-nav_color font-bold hover:text-nav_color/80"><a href="/confefv2/conselho/">Conselho</a></li>
+      <li class="text-nav_color font-bold hover:text-nav_color/80"><a href="/confefv2/registro/">Registro</a></li>
+      <li class="text-nav_color font-bold hover:text-nav_color/80"><a href="/confefv2/crefs/">CREFs</a></li>
+      <li class="text-nav_color font-bold hover:text-nav_color/80"><a href="/confefv2/fale-conosco/">Fale Conosco</a></li>
+      <li class="text-nav_color font-bold hover:text-nav_color/80"><a href="/confefv2/conteudo/2316">Antidopagem</a></li>
+      <li class="text-nav_color font-bold hover:text-nav_color/80 search-icon" onclick="openSearchModal()">
+        <a href="javascript:void(0);"><i class="ri-search-line"></i></a>
+      </li>
+    </ul>
+  </div>
+
+
+</div>
+<div class="header-main">
+  <div class="header-content-container">
+    <div class="header-extra flex items-center space-x-4">
+      <div class="header-hamburger">
+        <div class="header-hamburger-line"></div>
+        <div class="header-hamburger-line"></div>
+        <div class="header-hamburger-line"></div>
+      </div>
+      <div class="header-logo-sticky">
+        <a href="https://www.confef.org.br">
+          <img src="/confefv2/src/assets/images/logo-confef.png" alt="Logo confef">
+        </a>
+      </div>
+    </div>
+
+    <div class="header-main-search">
+      <script language="javascript">
+        function validaBuscaRegistrados() {
