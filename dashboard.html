@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -189,7 +190,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Detalhes da Denúncia</h3>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <div class="modal-actions">
+                    <button class="btn btn-primary btn-sm" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        Gerar PDF
+                    </button>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
             </div>
             <div class="modal-body" id="modalBody">
                 <!-- Conteúdo será carregado dinamicamente -->

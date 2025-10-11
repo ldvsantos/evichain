@@ -489,6 +489,213 @@ def get_latest_analysis():
             'error': str(e)
         }), 500
 
+@app.route('/api/generate_pdf', methods=['POST'])
+def generate_pdf():
+    """Gera PDF com dados da denúncia"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'success': False, 'error': 'Dados não fornecidos'}), 400
+        
+        # Extrair todos os dados da denúncia
+        complaint_id = data.get('complaint_id', 'N/A')
+        titulo = data.get('titulo', 'N/A')
+        assunto = data.get('assunto', 'N/A')
+        prioridade = data.get('prioridade', 'N/A')
+        finalidade = data.get('finalidade', 'N/A')
+        conselho = data.get('conselho', 'N/A')
+        categoria = data.get('categoria', 'N/A')
+        timestamp = data.get('timestamp', datetime.datetime.now().isoformat())
+        codigosAnteriores = data.get('codigosAnteriores')
+        ouvidoriaAnonima = data.get('ouvidoriaAnonima', False)
+        anonymous = data.get('anonymous', False)
+        descricao = data.get('descricao', 'Não disponível')
+        ia_analysis = data.get('ia_analysis', {})
+        metadata = data.get('metadata', {})
+        
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from io import BytesIO
+        import datetime
+        
+        # Criar documento PDF em memória
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, 
+                              rightMargin=72, leftMargin=72,
+                              topMargin=72, bottomMargin=18)
+        
+        # Estilos
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=30,
+            alignment=1  # Centralizado
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=14,
+            spaceAfter=12,
+            textColor='#2c3e50'
+        )
+        
+        # Conteúdo do PDF
+        story = []
+        
+        # Título
+        story.append(Paragraph("RELATÓRIO DE DENÚNCIA - EVICHAIN", title_style))
+        story.append(Spacer(1, 20))
+        
+        # Informações básicas completas
+        story.append(Paragraph("INFORMAÇÕES BÁSICAS DA DENÚNCIA", heading_style))
+        story.append(Paragraph(f"<b>ID da Denúncia:</b> {complaint_id}", styles['Normal']))
+        story.append(Paragraph(f"<b>Título:</b> {titulo}", styles['Normal']))
+        story.append(Paragraph(f"<b>Assunto:</b> {assunto}", styles['Normal']))
+        story.append(Paragraph(f"<b>Prioridade:</b> {prioridade}", styles['Normal']))
+        story.append(Paragraph(f"<b>Finalidade:</b> {finalidade}", styles['Normal']))
+        story.append(Paragraph(f"<b>Conselho:</b> {conselho}", styles['Normal']))
+        story.append(Paragraph(f"<b>Categoria:</b> {categoria}", styles['Normal']))
+        
+        # Formatar data
+        try:
+            from datetime import datetime as dt
+            if timestamp:
+                data_formatada = dt.fromisoformat(timestamp.replace('Z', '+00:00')).strftime('%d/%m/%Y %H:%M')
+            else:
+                data_formatada = 'N/A'
+        except:
+            data_formatada = timestamp or 'N/A'
+            
+        story.append(Paragraph(f"<b>Data de Registro:</b> {data_formatada}", styles['Normal']))
+        story.append(Paragraph(f"<b>Status:</b> Registrada", styles['Normal']))
+        
+        if codigosAnteriores:
+            story.append(Paragraph(f"<b>Códigos Anteriores:</b> {codigosAnteriores}", styles['Normal']))
+        
+        story.append(Spacer(1, 15))
+        
+        # Configurações de privacidade
+        story.append(Paragraph("CONFIGURAÇÕES DE PRIVACIDADE", heading_style))
+        story.append(Paragraph(f"<b>Ouvidoria Anônima:</b> {'Sim' if ouvidoriaAnonima else 'Não'}", styles['Normal']))
+        story.append(Paragraph(f"<b>Manter Anonimato:</b> {'Sim' if anonymous else 'Não'}", styles['Normal']))
+        story.append(Spacer(1, 15))
+        
+        # Descrição da denúncia
+        story.append(Paragraph("DESCRIÇÃO DA DENÚNCIA", heading_style))
+        story.append(Paragraph(descricao, styles['Normal']))
+        story.append(Spacer(1, 20))
+        
+        # Análise da IA
+        if ia_analysis:
+            story.append(Paragraph("ANÁLISE DA INTELIGÊNCIA ARTIFICIAL", heading_style))
+            
+            if 'classificacao' in ia_analysis:
+                story.append(Paragraph(f"<b>Classificação:</b> {ia_analysis['classificacao']}", styles['Normal']))
+            
+            if 'gravidade' in ia_analysis:
+                story.append(Paragraph(f"<b>Gravidade:</b> {ia_analysis['gravidade']}", styles['Normal']))
+            
+            if 'analise_detalhada' in ia_analysis:
+                story.append(Paragraph("<b>Análise Detalhada:</b>", styles['Normal']))
+                story.append(Paragraph(ia_analysis['analise_detalhada'], styles['Normal']))
+            
+            if 'recomendacoes' in ia_analysis:
+                story.append(Paragraph("<b>Recomendações:</b>", styles['Normal']))
+                for rec in ia_analysis['recomendacoes']:
+                    story.append(Paragraph(f"• {rec}", styles['Normal']))
+            
+            story.append(Spacer(1, 20))
+        
+        # Investigação automática
+        investigacao = ia_analysis.get('investigacao_automatica', {}) if ia_analysis else {}
+        if investigacao:
+            story.append(Paragraph("INVESTIGAÇÃO AUTOMÁTICA REALIZADA", heading_style))
+            
+            # Relatório de detecção
+            if 'relatorio_deteccao' in investigacao:
+                story.append(Paragraph("<b>Relatório de Detecção:</b>", styles['Normal']))
+                story.append(Paragraph(investigacao['relatorio_deteccao'], styles['Normal']))
+                story.append(Spacer(1, 10))
+            
+            # Profissionais identificados
+            deteccao = investigacao.get('deteccao_nomes', {})
+            if deteccao.get('nomes_detectados'):
+                story.append(Paragraph("<b>Profissionais Identificados:</b>", styles['Normal']))
+                for nome in deteccao['nomes_detectados']:
+                    story.append(Paragraph(f"• <b>{nome.get('nome_detectado', 'N/A')}</b> (Confiabilidade: {nome.get('confiabilidade', 0)}%)", styles['Normal']))
+                    story.append(Paragraph(f"  Contexto: {nome.get('contexto_encontrado', 'N/A')}", styles['Normal']))
+                story.append(Spacer(1, 10))
+            
+            # Resultados das investigações
+            investigacoes = investigacao.get('investigacoes_realizadas', [])
+            if investigacoes:
+                story.append(Paragraph("<b>Resultados das Investigações:</b>", styles['Normal']))
+                for inv in investigacoes:
+                    story.append(Paragraph(f"<b>Investigado:</b> {inv.get('nome_investigado', 'N/A')}", styles['Normal']))
+                    
+                    resultado = inv.get('resultado_investigacao', {})
+                    registros = resultado.get('registros_oficiais', {})
+                    
+                    if registros.get('registro_encontrado'):
+                        story.append(Paragraph("Status: REGISTRO ENCONTRADO", styles['Normal']))
+                        dados_prof = registros.get('dados_profissional', {})
+                        if dados_prof.get('nome_completo_oficial'):
+                            story.append(Paragraph(f"• Nome Oficial: {dados_prof['nome_completo_oficial']}", styles['Normal']))
+                        if dados_prof.get('registro_crm_completo') or dados_prof.get('registro_completo'):
+                            registro = dados_prof.get('registro_crm_completo') or dados_prof.get('registro_completo')
+                            story.append(Paragraph(f"• Registro: {registro}", styles['Normal']))
+                        if dados_prof.get('situacao_registro'):
+                            story.append(Paragraph(f"• Situação: {dados_prof['situacao_registro']}", styles['Normal']))
+                        if dados_prof.get('tipo_formacao'):
+                            story.append(Paragraph(f"• Formação: {dados_prof['tipo_formacao']}", styles['Normal']))
+                    else:
+                        story.append(Paragraph("Status: BUSCA REALIZADA", styles['Normal']))
+                    
+                    resumo = resultado.get('resumo_investigacao', {})
+                    if resumo.get('pontuacao_confiabilidade') is not None:
+                        story.append(Paragraph(f"• Confiabilidade: {resumo['pontuacao_confiabilidade']}/100", styles['Normal']))
+                    
+                    story.append(Spacer(1, 8))
+            
+            story.append(Spacer(1, 20))
+        
+        # Rodapé
+        story.append(Spacer(1, 30))
+        story.append(Paragraph("_" * 80, styles['Normal']))
+        story.append(Paragraph("Documento gerado automaticamente pelo sistema EviChain", styles['Italic']))
+        
+        # Construir PDF
+        doc.build(story)
+        pdf_content = buffer.getvalue()
+        buffer.close()
+        
+        # Retornar PDF como resposta
+        from flask import make_response
+        response = make_response(pdf_content)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=denuncia_{complaint_id}.pdf'
+        
+        return response
+        
+    except ImportError:
+        # Se reportlab não estiver disponível, retornar erro informativo
+        return jsonify({
+            'success': False,
+            'error': 'Biblioteca reportlab não está instalada. Use: pip install reportlab'
+        }), 500
+    
+    except Exception as e:
+        print(f"[ERROR] Erro ao gerar PDF: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 if __name__ == '__main__':
     print("\n================ EviChain API Server ==================")
     print(f"🔗 Acesso principal: http://localhost:5000")

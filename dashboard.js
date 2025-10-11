@@ -1,6 +1,7 @@
 // Dashboard Principal - Sistema EviChain
 let complaintsData = [];
 let analyticsData = {};
+let currentComplaint = null; // Armazena a denúncia atualmente aberta no modal
 
 // Inicialização do dashboard
 document.addEventListener('DOMContentLoaded', function() {
@@ -170,6 +171,9 @@ function openInvestigationPage() {
 function viewComplaintDetails(complaintId) {
     const complaint = complaintsData.find(c => c.id === complaintId);
     if (!complaint) return;
+    
+    // Armazenar denúncia atual para geração de PDF
+    currentComplaint = complaint;
     
     const modal = document.getElementById('complaintModal');
     const modalBody = document.getElementById('modalBody');
@@ -494,4 +498,699 @@ function getGravidadeBadgeClass(gravidade) {
         case 'leve': return 'bg-success';
         default: return 'bg-secondary';
     }
+}
+
+// ============================================================================
+// GERAÇÃO DE PDF
+// ============================================================================
+
+function exportToPDF() {
+    if (!currentComplaint) {
+        alert('Nenhuma denúncia selecionada para exportar.');
+        return;
+    }
+    
+    // Perguntar ao usuário qual método usar
+    const useBackend = confirm(
+        'Escolha o método para gerar o PDF:\n\n' +
+        'OK - Usar servidor (PDF profissional com formatação avançada)\n' +
+        'Cancelar - Usar navegador (PDF simples, sem necessidade do servidor)'
+    );
+    
+    if (useBackend) {
+        exportPDFViaBackend();
+    } else {
+        exportPDFViaFrontend();
+    }
+}
+
+function exportPDFViaBackend() {
+    try {
+        // Preparar dados completos para envio ao backend
+        const pdfData = {
+            // Informações básicas
+            complaint_id: currentComplaint.id || 'sem_id',
+            titulo: currentComplaint.titulo || 'N/A',
+            assunto: currentComplaint.assunto || 'N/A',
+            prioridade: currentComplaint.prioridade || 'N/A',
+            finalidade: currentComplaint.finalidade || 'N/A',
+            conselho: currentComplaint.conselho || 'N/A',
+            categoria: currentComplaint.categoria || 'N/A',
+            timestamp: currentComplaint.timestamp || new Date().toISOString(),
+            codigosAnteriores: currentComplaint.codigosAnteriores || null,
+            
+            // Configurações de privacidade
+            ouvidoriaAnonima: currentComplaint.ouvidoriaAnonima || false,
+            anonymous: currentComplaint.anonymous || false,
+            
+            // Descrição
+            descricao: currentComplaint.descricao || 'Não disponível',
+            
+            // Análise completa da IA
+            ia_analysis: currentComplaint.ia_analysis || {},
+            
+            // Metadados adicionais
+            metadata: currentComplaint.metadata || {}
+        };
+        
+        showSuccessMessage('Gerando PDF no servidor...');
+        
+        // Fazer requisição para o backend
+        fetch('/api/generate_pdf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(pdfData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            // Criar URL para download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `EviChain_Denuncia_${currentComplaint.id || 'sem_id'}_${getCurrentDateString()}.pdf`;
+            
+            // Adicionar ao DOM, clicar e remover
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            // Limpar URL
+            window.URL.revokeObjectURL(url);
+            
+            showSuccessMessage('PDF baixado com sucesso!');
+        })
+        .catch(error => {
+            console.error('Erro ao gerar PDF via backend:', error);
+            showError('Erro ao gerar PDF via servidor: ' + error.message + '\nTentando método alternativo...');
+            
+            // Fallback para frontend
+            setTimeout(() => {
+                exportPDFViaFrontend();
+            }, 2000);
+        });
+        
+    } catch (error) {
+        console.error('Erro ao preparar dados para PDF:', error);
+        showError('Erro ao preparar dados: ' + error.message);
+        
+        // Fallback para frontend
+        exportPDFViaFrontend();
+    }
+}
+
+function exportPDFViaFrontend() {
+function exportPDFViaFrontend() {
+    if (!currentComplaint) {
+        alert('Nenhuma denúncia selecionada para exportar.');
+        return;
+    }
+    
+    try {
+        // Verificar se jsPDF está disponível
+        if (!window.jspdf) {
+            showError('Biblioteca jsPDF não carregada. Recarregue a página e tente novamente.');
+            return;
+        }
+        
+        // Inicializar jsPDF
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Configurações
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const maxWidth = pageWidth - (margin * 2);
+        let yPosition = margin;
+        
+        showSuccessMessage('Gerando PDF no navegador...');
+        
+        // Header do documento
+        addPDFHeader(doc, yPosition, maxWidth);
+        yPosition += 30;
+        
+        // Informações básicas da denúncia
+        yPosition = addBasicInfo(doc, yPosition, maxWidth);
+        yPosition += 10;
+        
+        // Análise da IA
+        yPosition = addIAAnalysis(doc, yPosition, maxWidth);
+        
+        // Investigação automática
+        yPosition = addInvestigationResults(doc, yPosition, maxWidth);
+        
+        // Footer
+        addPDFFooter(doc, pageHeight);
+        
+        // Salvar PDF
+        const fileName = `EviChain_Denuncia_${currentComplaint.id || 'sem_id'}_${getCurrentDateString()}.pdf`;
+        doc.save(fileName);
+        
+        showSuccessMessage(`PDF exportado com sucesso: ${fileName}`);
+        
+    } catch (error) {
+        console.error('Erro ao gerar PDF via frontend:', error);
+        showError('Erro ao gerar PDF no navegador: ' + error.message);
+    }
+}
+}
+
+function addPDFHeader(doc, yPos, maxWidth) {
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Logo/Título
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 64, 175); // Azul EviChain
+    doc.text('EVICHAIN - SISTEMA DE ANÁLISE DE DENÚNCIAS', margin, yPos);
+    
+    // Linha separadora
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPos + 5, pageWidth - margin, yPos + 5);
+    
+    // Data e hora do relatório
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Relatório gerado em: ${getCurrentDateTime()}`, margin, yPos + 15);
+}
+
+function addBasicInfo(doc, yPos, maxWidth) {
+    const margin = 20;
+    let currentY = yPos;
+    
+    // Título da seção
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('INFORMAÇÕES BÁSICAS DA DENÚNCIA', margin, currentY);
+    currentY += 10;
+    
+    // Informações básicas completas
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    
+    const basicInfo = [
+        ['ID da Denúncia:', currentComplaint.id || 'N/A'],
+        ['Título:', currentComplaint.titulo || 'N/A'],
+        ['Assunto:', currentComplaint.assunto || 'N/A'],
+        ['Prioridade:', currentComplaint.prioridade || 'N/A'],
+        ['Finalidade:', currentComplaint.finalidade || 'N/A'],
+        ['Conselho:', currentComplaint.conselho || 'N/A'],
+        ['Categoria:', currentComplaint.categoria || 'N/A'],
+        ['Data de Registro:', formatDate(currentComplaint.timestamp)],
+        ['Status:', 'Registrada']
+    ];
+
+    // Adicionar códigos anteriores se existir
+    if (currentComplaint.codigosAnteriores) {
+        basicInfo.push(['Códigos Anteriores:', currentComplaint.codigosAnteriores]);
+    }
+    
+    basicInfo.forEach(([label, value]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(label, margin, currentY);
+        doc.setFont('helvetica', 'normal');
+        const wrappedText = doc.splitTextToSize(value, maxWidth - 60);
+        doc.text(wrappedText, margin + 60, currentY);
+        currentY += wrappedText.length * 5;
+    });
+    
+    // Configurações de Privacidade
+    currentY += 5;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(50, 50, 50);
+    doc.text('CONFIGURAÇÕES DE PRIVACIDADE', margin, currentY);
+    currentY += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    
+    const privacyInfo = [
+        ['Ouvidoria Anônima:', currentComplaint.ouvidoriaAnonima ? 'Sim' : 'Não'],
+        ['Manter Anonimato:', currentComplaint.anonymous ? 'Sim' : 'Não']
+    ];
+    
+    privacyInfo.forEach(([label, value]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(label, margin, currentY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(value, margin + 60, currentY);
+        currentY += 5;
+    });
+    
+    // Descrição da denúncia
+    if (currentComplaint.descricao) {
+        currentY += 8;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(50, 50, 50);
+        doc.text('DESCRIÇÃO DA DENÚNCIA', margin, currentY);
+        currentY += 8;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        const descriptionText = doc.splitTextToSize(currentComplaint.descricao, maxWidth);
+        doc.text(descriptionText, margin, currentY);
+        currentY += descriptionText.length * 5;
+    }
+    
+    return currentY;
+}
+
+function addIAAnalysis(doc, yPos, maxWidth) {
+    const margin = 20;
+    let currentY = yPos;
+    const iaAnalysis = currentComplaint.ia_analysis || {};
+    
+    if (!Object.keys(iaAnalysis).length) {
+        return currentY;
+    }
+    
+    // Verificar se precisa de nova página
+    if (currentY > 200) {
+        doc.addPage();
+        currentY = margin;
+    }
+    
+    // Título da seção
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('ANÁLISE INTELIGENTE (IA)', margin, currentY);
+    currentY += 12;
+    
+    // Análise básica da IA
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(50, 50, 50);
+    doc.text('Análise Básica', margin, currentY);
+    currentY += 8;
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    
+    const basicIAInfo = [
+        ['Gravidade:', iaAnalysis.analise_juridica?.gravidade || 'N/A'],
+        ['Tipificação:', iaAnalysis.analise_juridica?.tipificacao || 'N/A'],
+        ['Nível de Risco:', `${iaAnalysis.classificacao_risco?.nivel || 'N/A'} (${iaAnalysis.classificacao_risco?.pontuacao || 0}/100)`],
+        ['Ação Recomendada:', iaAnalysis.classificacao_risco?.acao_recomendada || 'N/A'],
+        ['Legislação Possível:', iaAnalysis.analise_juridica?.legislacao_especifica?.legislacao_sugerida || 'N/A']
+    ];
+    
+    basicIAInfo.forEach(([label, value]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(label, margin, currentY);
+        doc.setFont('helvetica', 'normal');
+        const wrappedText = doc.splitTextToSize(value, maxWidth - 65);
+        doc.text(wrappedText, margin + 65, currentY);
+        currentY += wrappedText.length * 5;
+    });
+    
+    // Resumo da IA
+    if (iaAnalysis.analise_basica?.resumo) {
+        currentY += 5;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Resumo:', margin, currentY);
+        currentY += 7;
+        
+        doc.setFont('helvetica', 'normal');
+        const resumoText = doc.splitTextToSize(iaAnalysis.analise_basica.resumo, maxWidth);
+        doc.text(resumoText, margin, currentY);
+        currentY += resumoText.length * 5;
+    }
+    
+    // Palavras-chave
+    if (iaAnalysis.analise_basica?.palavras_chave?.length > 0) {
+        currentY += 5;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Palavras-Chave Identificadas:', margin, currentY);
+        currentY += 7;
+        
+        doc.setFont('helvetica', 'normal');
+        const palavrasText = iaAnalysis.analise_basica.palavras_chave.join(', ');
+        const wrappedPalavras = doc.splitTextToSize(palavrasText, maxWidth);
+        doc.text(wrappedPalavras, margin, currentY);
+        currentY += wrappedPalavras.length * 5;
+    }
+    
+    // Recomendações
+    if (iaAnalysis.recomendacoes?.length > 0) {
+        currentY += 8;
+        doc.setFont('helvetica', 'bold');
+        doc.text('Recomendações:', margin, currentY);
+        currentY += 7;
+        
+        doc.setFont('helvetica', 'normal');
+        iaAnalysis.recomendacoes.forEach(rec => {
+            const recText = doc.splitTextToSize(`• ${rec}`, maxWidth - 5);
+            doc.text(recText, margin, currentY);
+            currentY += recText.length * 5;
+        });
+    }
+    
+    // Legislação específica detalhada
+    const legislacao = iaAnalysis.analise_juridica?.legislacao_especifica;
+    if (legislacao) {
+        currentY += 10;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(30, 64, 175);
+        doc.text('LEGISLAÇÃO RECOMENDADA PELA IA', margin, currentY);
+        currentY += 10;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        
+        const legislacaoInfo = [
+            ['Legislação Sugerida:', legislacao.legislacao_sugerida || 'N/A'],
+            ['Conselho:', legislacao.conselho || 'N/A'],
+            ['Tipo de Infração:', legislacao.tipo || 'N/A'],
+            ['Descrição:', legislacao.descricao || 'N/A']
+        ];
+        
+        legislacaoInfo.forEach(([label, value]) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label, margin, currentY);
+            doc.setFont('helvetica', 'normal');
+            const wrappedText = doc.splitTextToSize(value, maxWidth - 70);
+            doc.text(wrappedText, margin + 70, currentY);
+            currentY += wrappedText.length * 5;
+        });
+        
+        // Artigos
+        if (legislacao.artigos && legislacao.artigos.length > 0) {
+            currentY += 5;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Artigos:', margin, currentY);
+            currentY += 7;
+            
+            doc.setFont('helvetica', 'normal');
+            const artigosText = legislacao.artigos.join(', ');
+            const wrappedArtigos = doc.splitTextToSize(artigosText, maxWidth);
+            doc.text(wrappedArtigos, margin, currentY);
+            currentY += wrappedArtigos.length * 5;
+        }
+        
+        // Penalidades
+        if (legislacao.penalidades && legislacao.penalidades.length > 0) {
+            currentY += 5;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Penalidades:', margin, currentY);
+            currentY += 7;
+            
+            doc.setFont('helvetica', 'normal');
+            const penalidadesText = legislacao.penalidades.join(', ');
+            const wrappedPenalidades = doc.splitTextToSize(penalidadesText, maxWidth);
+            doc.text(wrappedPenalidades, margin, currentY);
+            currentY += wrappedPenalidades.length * 5;
+        }
+    }
+    
+    return currentY;
+}
+
+function addInvestigationResults(doc, yPos, maxWidth) {
+    const margin = 20;
+    let currentY = yPos;
+    const iaAnalysis = currentComplaint.ia_analysis || {};
+    const investigacao = iaAnalysis.investigacao_automatica;
+    
+    if (!investigacao) {
+        return currentY;
+    }
+    
+    // Verificar se precisa de nova página
+    if (currentY > 180) {
+        doc.addPage();
+        currentY = margin;
+    }
+    
+    // Título da seção
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(0, 0, 0);
+    doc.text('INVESTIGAÇÃO AUTOMÁTICA REALIZADA', margin, currentY);
+    currentY += 12;
+    
+    // Relatório de detecção
+    if (investigacao.relatorio_deteccao) {
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(50, 50, 50);
+        doc.text('Relatório de Detecção:', margin, currentY);
+        currentY += 8;
+        
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(0, 0, 0);
+        const relatorioText = doc.splitTextToSize(investigacao.relatorio_deteccao, maxWidth);
+        doc.text(relatorioText, margin, currentY);
+        currentY += relatorioText.length * 4.5;
+    }
+    
+    // Profissionais identificados
+    const deteccao = investigacao.deteccao_nomes || {};
+    if (deteccao.nomes_detectados && deteccao.nomes_detectados.length > 0) {
+        currentY += 8;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(46, 125, 50);
+        doc.text('PROFISSIONAIS IDENTIFICADOS', margin, currentY);
+        currentY += 8;
+        
+        deteccao.nomes_detectados.forEach(nome => {
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(`• ${nome.nome_detectado}`, margin, currentY);
+            currentY += 6;
+            
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(80, 80, 80);
+            doc.text(`Confiabilidade: ${nome.confiabilidade}%`, margin + 5, currentY);
+            currentY += 5;
+            
+            const contextoText = doc.splitTextToSize(`Contexto: ${nome.contexto_encontrado}`, maxWidth - 10);
+            doc.text(contextoText, margin + 5, currentY);
+            currentY += contextoText.length * 4.5 + 5;
+        });
+    }
+    
+    // Resultados das investigações realizadas
+    const investigacoes = investigacao.investigacoes_realizadas || [];
+    if (investigacoes.length > 0) {
+        currentY += 10;
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(25, 118, 210);
+        doc.text('RESULTADOS DAS INVESTIGAÇÕES', margin, currentY);
+        currentY += 10;
+        
+        investigacoes.forEach((inv, index) => {
+            // Verificar se precisa de nova página
+            if (currentY > 220) {
+                doc.addPage();
+                currentY = margin;
+            }
+            
+            const resultado = inv.resultado_investigacao || {};
+            const registros = resultado.registros_oficiais || {};
+            const dadosProf = registros.dados_profissional || {};
+            const resumo = resultado.resumo_investigacao || {};
+            
+            // Nome do investigado
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.text(`🔎 ${inv.nome_investigado}`, margin, currentY);
+            currentY += 8;
+            
+            // Status da investigação
+            const statusText = registros.registro_encontrado ? 'REGISTRO ENCONTRADO' : 'BUSCA REALIZADA';
+            const statusColor = registros.registro_encontrado ? [76, 175, 80] : [255, 152, 0];
+            
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...statusColor);
+            doc.text(`Status: ${statusText}`, margin + 5, currentY);
+            currentY += 8;
+            
+            // Dados do profissional (se encontrado)
+            if (registros.registro_encontrado && dadosProf.nome_completo_oficial) {
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(46, 125, 50);
+                doc.text('DADOS OFICIAIS ENCONTRADOS:', margin + 5, currentY);
+                currentY += 6;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(0, 0, 0);
+                
+                const dadosOficiais = [
+                    ['Nome Oficial:', dadosProf.nome_completo_oficial],
+                    ['Registro:', dadosProf.registro_crm_completo || dadosProf.registro_completo || 'N/A'],
+                    ['Situação:', dadosProf.situacao_registro || 'N/A'],
+                    ['Formação:', dadosProf.tipo_formacao || 'N/A']
+                ];
+                
+                if (dadosProf.especialidades_registradas) {
+                    const especialidades = Array.isArray(dadosProf.especialidades_registradas) 
+                        ? dadosProf.especialidades_registradas.join(', ') 
+                        : dadosProf.especialidades_registradas;
+                    dadosOficiais.push(['Especialidades:', especialidades]);
+                }
+                
+                if (dadosProf.cidade_registro) {
+                    dadosOficiais.push(['Cidade:', dadosProf.cidade_registro]);
+                }
+                
+                dadosOficiais.forEach(([label, value]) => {
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(label, margin + 10, currentY);
+                    doc.setFont('helvetica', 'normal');
+                    const valueText = doc.splitTextToSize(value, maxWidth - 80);
+                    doc.text(valueText, margin + 50, currentY);
+                    currentY += valueText.length * 4.5;
+                });
+            }
+            
+            // Pontuação de confiabilidade
+            if (resumo.pontuacao_confiabilidade !== undefined) {
+                currentY += 3;
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(25, 118, 210);
+                doc.text(`Confiabilidade da Investigação: ${resumo.pontuacao_confiabilidade}/100`, margin + 5, currentY);
+                currentY += 6;
+            }
+            
+            currentY += 8; // Espaçamento entre investigações
+        });
+    } else {
+        currentY += 8;
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(150, 150, 150);
+        doc.text('Nenhuma investigação foi realizada automaticamente para esta denúncia.', margin, currentY);
+        currentY += 8;
+    }
+    
+    return currentY;
+}
+
+function addSubSection(doc, yPos, maxWidth, title, dataArray) {
+    const margin = 20;
+    let currentY = yPos;
+    
+    // Título da subseção
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(50, 50, 50);
+    doc.text(title, margin, currentY);
+    currentY += 8;
+    
+    // Dados
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(0, 0, 0);
+    
+    if (Array.isArray(dataArray[0])) {
+        // Array de pares [label, value]
+        dataArray.forEach(([label, value]) => {
+            if (currentY > 280) {
+                doc.addPage();
+                currentY = margin;
+            }
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${label}`, margin + 5, currentY);
+            doc.setFont('helvetica', 'normal');
+            const wrappedText = doc.splitTextToSize(value, maxWidth - 70);
+            doc.text(wrappedText, margin + 65, currentY);
+            currentY += wrappedText.length * 4 + 2;
+        });
+    } else {
+        // Array simples de strings
+        dataArray.forEach(item => {
+            if (currentY > 280) {
+                doc.addPage();
+                currentY = margin;
+            }
+            
+            const wrappedText = doc.splitTextToSize(item, maxWidth - 10);
+            doc.text(wrappedText, margin + 5, currentY);
+            currentY += wrappedText.length * 4 + 2;
+        });
+    }
+    
+    return currentY + 5;
+}
+
+function addPDFFooter(doc, pageHeight) {
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const totalPages = doc.internal.getNumberOfPages();
+    
+    for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        
+        // Linha separadora
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, pageHeight - 20, pageWidth - margin, pageHeight - 20);
+        
+        // Texto do footer
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('EviChain - Sistema de Análise Inteligente de Denúncias', margin, pageHeight - 10);
+        doc.text(`Página ${i} de ${totalPages}`, pageWidth - margin - 30, pageHeight - 10);
+    }
+}
+
+// Funções auxiliares
+function getCurrentDateTime() {
+    return new Date().toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
+function getCurrentDateString() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function showSuccessMessage(message) {
+    // Criar notificação de sucesso
+    const notification = document.createElement('div');
+    notification.className = 'pdf-notification success';
+    notification.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
 }
