@@ -18,39 +18,71 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT || 22 }}
           script_stop: true
           script: |
-            set -euo pipefail
-            REMOTE_DIR="${{ secrets.EC2_REMOTE_DIR }}"
-            if [ -z "$REMOTE_DIR" ]; then REMOTE_DIR="/opt/evichain"; fi
+            set -exuo pipefail
+            
+            # Variáveis padrão
+            REMOTE_DIR="/opt/evichain"
             BRANCH="main"
-            SERVICE_NAME="${{ secrets.EC2_SERVICE_NAME }}"
-            if [ -z "$SERVICE_NAME" ]; then SERVICE_NAME="evichain"; fi
-            APP_USER="${{ secrets.EC2_APP_USER }}"
-            if [ -z "$APP_USER" ]; then APP_USER="${{ secrets.EC2_USER }}"; fi
-            APP_PORT="${{ secrets.EC2_APP_PORT }}"
-            if [ -z "$APP_PORT" ]; then APP_PORT="8000"; fi
-
-            # Clona via SSH (usa a deploy key já configurada na EC2)
-            REPO_URL="git@github.com:${{ github.repository }}.git"
-
+            SERVICE_NAME="evichain"
+            APP_PORT="8000"
+            REPO_URL="git@github.com:ldvsantos/evichain_poc-.git"
+            
+            echo "====== [WORKFLOW] Iniciando deploy ======"
+            echo "[WORKFLOW] REMOTE_DIR=$REMOTE_DIR"
+            echo "[WORKFLOW] SERVICE_NAME=$SERVICE_NAME"
+            echo "[WORKFLOW] BRANCH=$BRANCH"
+            
+            # Clone se não existir
             if [ ! -d "$REMOTE_DIR/.git" ]; then
+              echo "[GIT] Primeira clonagem..."
               sudo mkdir -p "$REMOTE_DIR"
               sudo chown -R "$USER:$USER" "$REMOTE_DIR"
               git clone "$REPO_URL" "$REMOTE_DIR"
             fi
-
+            
+            # Atualiza repositório
             cd "$REMOTE_DIR"
-            git remote set-url origin "$REPO_URL" || true
+            echo "[GIT] Atualizando repositório..."
             git fetch --prune
-            git checkout "$BRANCH"
-            # Força o estado do servidor para coincidir com o repositório remoto, descartando alterações locais
             git reset --hard origin/"$BRANCH"
-
+            echo "[GIT] ✓ Atualização concluída"
+            
+            # Verifica se é primeira instalação
             if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
-              echo "[SETUP] Primeira vez. Executando setup..."
-              bash -x scripts/ec2_setup.sh 2>&1 || exit 1
+              echo "[SETUP] Primeira instalação. Executando setup..."
+              bash scripts/ec2_setup.sh
             else
-              echo "[DEPLOY] Atualizando. Executando deploy..."
-              bash -x scripts/ec2_deploy.sh 2>&1 || exit 1
+              echo "[DEPLOY] Atualizando código e reiniciando..."
+              
+              # Deploy inline aqui
+              echo "[PIP] Instalando dependências..."
+              python3 -m pip install -q -U pip setuptools wheel
+              pip install -q -r requirements.txt
+              pip install -q gunicorn
+              
+              echo "[PYTHON] Testando importação..."
+              python3 -c "import sys; sys.path.insert(0, '.'); import api_server; print('[IMPORT] ✓ OK')"
+              
+              echo "[SERVICE] Reiniciando $SERVICE_NAME..."
+              sudo systemctl restart "$SERVICE_NAME"
+              
+              echo "[WAIT] Aguardando 3 segundos..."
+              sleep 3
+              
+              echo "[HEALTHCHECK] Verificando saúde..."
+              for i in {1..15}; do
+                echo "[CHECK] Tentativa $i/15..."
+                if curl -sf http://127.0.0.1/api/health > /dev/null 2>&1; then
+                  echo "[SUCCESS] ✓ Healthcheck passou!"
+                  exit 0
+                fi
+                sleep 1
+              done
+              
+              echo "[ERROR] ✗ Healthcheck falhou"
+              echo "[DEBUG] Logs do serviço:"
+              sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager
+              exit 1
             fi
             
-            echo "[WORKFLOW] Deploy script executado com sucesso!"
+            echo "[WORKFLOW] ✓ Deploy concluído com sucesso!"
