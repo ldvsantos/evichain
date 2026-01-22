@@ -262,6 +262,7 @@ body {
     background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
     border-radius: 50%;
     animation: float-slow 20s ease-in-out infinite;
+    pointer-events: none;
 }
 
 .hero::after {
@@ -274,6 +275,7 @@ body {
     background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
     border-radius: 50%;
     animation: float-slow 15s ease-in-out infinite reverse;
+    pointer-events: none;
 }
 
 @keyframes float-slow {
@@ -286,6 +288,8 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 4rem;
     align-items: center;
+    position: relative;
+    z-index: 1;
 }
 
 .hero-title {
