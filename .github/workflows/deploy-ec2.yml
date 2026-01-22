@@ -42,7 +42,8 @@ jobs:
             git remote set-url origin "$REPO_URL" || true
             git fetch --prune
             git checkout "$BRANCH"
-            git pull --rebase origin "$BRANCH"
+            # Força o estado do servidor para coincidir com o repositório remoto, descartando alterações locais
+            git reset --hard origin/"$BRANCH"
 
             if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
               REPO_URL="$REPO_URL" REMOTE_DIR="$REMOTE_DIR" SERVICE_NAME="$SERVICE_NAME" APP_PORT="$APP_PORT" APP_USER="$APP_USER" bash scripts/ec2_setup.sh

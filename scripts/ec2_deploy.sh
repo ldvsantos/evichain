@@ -16,7 +16,8 @@ git fetch --prune
 
 git checkout "$BRANCH"
 
-git pull --rebase origin "$BRANCH"
+# Força atualização descartando mudanças locais
+git reset --hard origin/"$BRANCH"
 
 python3 -m venv .venv
 source .venv/bin/activate
