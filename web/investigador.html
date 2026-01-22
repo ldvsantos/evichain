@@ -2,8 +2,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Investigador Digital - EviChain</title>
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon.svg">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <style>
         * {
             margin: 0;
@@ -198,6 +204,41 @@
             display: flex;
             border-bottom: 2px solid #e0e0e0;
             margin-bottom: 20px;
+        }
+
+        /* Mobile: tabs roláveis e layout mais compacto */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+            }
+
+            .tab {
+                flex: 0 0 auto;
+                padding: 10px 14px;
+            }
+
+            .btn {
+                width: 100%;
+                margin-right: 0;
+            }
+
+            .social-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .tab {
@@ -909,5 +950,6 @@
             }
         }
     </script>
+    <script src="/pwa.js"></script>
 </body>
 </html>

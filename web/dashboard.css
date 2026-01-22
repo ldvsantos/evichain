@@ -54,6 +54,7 @@ body {
 .header-actions {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -350,7 +351,8 @@ body {
     background: white;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .complaints-table {
@@ -715,6 +717,26 @@ body {
     .complaints-table th,
     .complaints-table td {
         padding: 0.75rem 0.5rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .brand {
+        font-size: 1.2rem;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .complaints-table {
+        min-width: 760px;
     }
 }
 
