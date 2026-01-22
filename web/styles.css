@@ -77,9 +77,20 @@ body {
     object-fit: contain;
 }
 
+.brand-title {
+    color: inherit;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+}
+
 @media (max-width: 768px) {
     .brand-logo {
         height: 32px;
+    }
+
+    .brand-title {
+        font-size: 1.25rem;
     }
 }
 

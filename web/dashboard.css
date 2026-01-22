@@ -55,6 +55,7 @@ body {
 .brand-link {
     display: inline-flex;
     align-items: center;
+    gap: 0.75rem;
     text-decoration: none;
 }
 
@@ -67,6 +68,12 @@ body {
 
 .brand-title {
     color: #1e40af;
+}
+
+.brand-name {
+    color: #1e40af;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
 .header-actions {
