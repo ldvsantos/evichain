@@ -67,7 +67,7 @@ sudo systemctl enable --now "$SERVICE_NAME"
 # nginx
 sudo tee "/etc/nginx/sites-available/${SERVICE_NAME}" > /dev/null <<EOF
 server {
-  listen 80;
+  listen 80 default_server;
   server_name _;
 
   location / {
@@ -80,6 +80,7 @@ server {
 EOF
 
 sudo ln -sf "/etc/nginx/sites-available/${SERVICE_NAME}" "/etc/nginx/sites-enabled/${SERVICE_NAME}"
+sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl restart nginx
 
