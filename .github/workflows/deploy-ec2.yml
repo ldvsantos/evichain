@@ -37,10 +37,11 @@ jobs:
             git reset --hard origin/"$BRANCH"
             echo "[GIT] Atualização concluída"
             SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-            if test ! -f "$SERVICE_FILE"; then
-              echo "[SETUP] Primeira instalação..."
-              bash scripts/ec2_setup.sh
-            else
+            set +e
+            test -f "$SERVICE_FILE"
+            SERVICE_EXISTS=$?
+            set -e
+            if [ "$SERVICE_EXISTS" = "0" ]; then
               echo "[DEPLOY] Atualizando código..."
               python3 -m pip install -q -U pip setuptools wheel || true
               pip install -q -r requirements.txt || exit 1
@@ -62,6 +63,9 @@ jobs:
               echo "FALHOU"
               sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager || true
               exit 1
+            else
+              echo "[SETUP] Primeira instalação..."
+              bash scripts/ec2_setup.sh
             fi
             echo "Deploy OK"
             DEPLOY_SCRIPT
