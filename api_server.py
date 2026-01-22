@@ -58,6 +58,10 @@ def init_app() -> None:
 def get_project_root() -> Path:
     return Path(app.config.get("EVICHAIN_PROJECT_ROOT", Path(__file__).resolve().parent)).resolve()
 
+
+def get_web_root() -> Path:
+    return (get_project_root() / "web").resolve()
+
 def log_trace(trace_id, stage, detail=""):
     timestamp = datetime.now().isoformat()
     print(f"[TRACE][{timestamp}][{trace_id}] {stage} - {detail}", flush=True)
@@ -142,15 +146,15 @@ def after_request(response):
 
 @app.route("/")
 def serve_index():
-    return send_from_directory(str(get_project_root()), "index.html")
+    return send_from_directory(str(get_web_root()), "index.html")
 
 @app.route("/dashboard.html")
 def serve_dashboard():
-    return send_from_directory(str(get_project_root()), "dashboard.html")
+    return send_from_directory(str(get_web_root()), "dashboard.html")
 
 @app.route("/<path:path>")
 def serve_static_files(path):
-    return send_from_directory(str(get_project_root()), path)
+    return send_from_directory(str(get_web_root()), path)
 
 
 @app.route("/api/health", methods=["GET"])

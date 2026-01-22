@@ -1,0 +1,55 @@
+name: Deploy EC2
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            REMOTE_DIR="${{ secrets.EC2_REMOTE_DIR }}"
+            BRANCH="main"
+            SERVICE_NAME="${{ secrets.EC2_SERVICE_NAME }}"
+            REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
+
+            if [ ! -d "$REMOTE_DIR/.git" ]; then
+              sudo mkdir -p "$REMOTE_DIR"
+              sudo chown -R "$USER:$USER" "$REMOTE_DIR"
+              git clone "$REPO_URL" "$REMOTE_DIR"
+            fi
+
+            cd "$REMOTE_DIR"
+            git fetch --prune
+            git checkout "$BRANCH"
+            git pull --rebase origin "$BRANCH"
+
+            python3 -m venv .venv
+            . .venv/bin/activate
+            python -m pip install -U pip
+            python -m pip install -r requirements.txt
+
+            sudo systemctl restart "$SERVICE_NAME" || true
+            sudo systemctl restart nginx || true
+
+            for i in $(seq 1 30); do
+              if curl -fsS http://127.0.0.1/api/health >/dev/null 2>&1; then
+                echo DEPLOY_OK
+                exit 0
+              fi
+              sleep 0.5
+            done
+
+            echo HEALTHCHECK_FAILED
+            exit 1

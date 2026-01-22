@@ -25,6 +25,13 @@ Thumbs.db
 .env.*
 !.env.example
 
+# AWS / SSH keys (NUNCA commitar)
+*.pem
+*.ppk
+id_rsa
+id_rsa.pub
+*.key
+
 # Node (if any front-end tooling is added later)
 node_modules/
 

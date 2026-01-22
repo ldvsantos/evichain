@@ -139,7 +139,7 @@ class IAEngineOpenAIPadrao:
     def _carregar_legislacao(self) -> None:
         """Carrega a base de conhecimento legislativa dos conselhos."""
         try:
-            legislacao_path = os.path.join(os.path.dirname(__file__), 'legislacao_conselhos.json')
+            legislacao_path = os.path.join(os.path.dirname(__file__), 'data', 'legislacao_conselhos.json')
             if os.path.exists(legislacao_path):
                 with open(legislacao_path, 'r', encoding='utf-8') as f:
                     self.legislacao = json.load(f)

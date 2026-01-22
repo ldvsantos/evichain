@@ -42,7 +42,9 @@ def load_settings(project_root: Path | None = None) -> Settings:
     load_env_file(root / ".env")
 
     host = os.getenv("FLASK_HOST", "0.0.0.0")
-    port_raw = os.getenv("FLASK_PORT", "5000")
+
+    # Em produção (ex.: AWS) é comum expor a porta via PORT.
+    port_raw = os.getenv("FLASK_PORT") or os.getenv("PORT") or "5000"
     try:
         port = int(port_raw)
     except ValueError:
@@ -50,7 +52,7 @@ def load_settings(project_root: Path | None = None) -> Settings:
 
     debug = os.getenv("FLASK_DEBUG", "").strip().lower() in {"1", "true", "yes", "y"}
 
-    data_file = root / os.getenv("EVICHAIN_DATA_FILE", "blockchain_data.json")
+    data_file = root / os.getenv("EVICHAIN_DATA_FILE", "data/blockchain_data.json")
 
     openai_api_key = os.getenv("OPENAI_API_KEY")
 

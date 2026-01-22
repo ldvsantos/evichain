@@ -16,7 +16,7 @@ CORS(app)
 
 # Inicializar blockchain
 print("🔗 Inicializando blockchain...")
-evichain = EviChainBlockchain(data_file="blockchain_data.json")
+evichain = EviChainBlockchain(data_file="data/blockchain_data.json")
 print(f"✅ Blockchain carregada com {len(evichain.chain)} blocos")
 
 @app.route('/')

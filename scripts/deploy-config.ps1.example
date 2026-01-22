@@ -1,0 +1,14 @@
+# Copie para scripts/deploy-config.ps1 (NÃO versione o arquivo real)
+# e ajuste conforme seu ambiente.
+@
+@{
+  Host      = '3.15.2.17'
+  User      = 'ubuntu'
+  # Preferencial: coloque a chave em %USERPROFILE%\.ssh\evichain.pem
+  # ou use um caminho absoluto.
+  KeyPath   = "$env:USERPROFILE\.ssh\evichain.pem"
+  SshPort   = 22
+  RemoteDir = '/opt/evichain'
+  Service   = 'evichain'
+  Branch    = 'main'
+}
