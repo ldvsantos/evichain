@@ -24,6 +24,15 @@ source .venv/bin/activate
 pip install -U pip
 pip install -r requirements.txt
 
+# Verifica se o código pode ser importado (detecta erros de biblioteca/sintaxe antes de reiniciar)
+echo "=== Verificação de Importação ==="
+if python3 -c "import sys; sys.path.append('.'); import api_server; print('Import OK')" 2>&1; then
+    echo "Importação bem sussedida."
+else
+    echo "CRITICAL: Falha ao importar api_server.py. Abortando restart."
+    exit 1
+fi
+
 sudo systemctl restart "$SERVICE_NAME"
 
 # healthcheck local (via nginx/app)
