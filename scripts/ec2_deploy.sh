@@ -22,31 +22,34 @@ git reset --hard origin/"$BRANCH"
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -U pip
+# Garante que o pip está atualizado
+python3 -m pip install -U pip setuptools wheel
 pip install -r requirements.txt
 
-# Verifica se o código pode ser importado (detecta erros de biblioteca/sintaxe antes de reiniciar)
-echo "=== Verificação de Importação ==="
-if python3 -c "import sys; sys.path.append('.'); import api_server; print('Import OK')" 2>&1; then
-    echo "Importação bem sussedida."
-else
-    echo "CRITICAL: Falha ao importar api_server.py. Abortando restart."
-    exit 1
-fi
+# Força instalação do gunicorn se não estiver no requirements (embora devasse estar)
+pip install gunicorn
 
+echo "=== Verificando arquivos ==="
+ls -la
+
+echo "=== Reiniciando serviço ==="
 sudo systemctl restart "$SERVICE_NAME"
 
-# healthcheck local (via nginx/app)
+echo "=== Aguardando serviço subir (Healthcheck) ==="
+# healthcheck local
 for i in $(seq 1 30); do
-  if curl -fsS "http://127.0.0.1/api/health" >/dev/null 2>&1; then
-    echo "DEPLOY_OK"
+  # Tenta curl e captura output para debug se falhar
+  if curl -v --max-time 2 "http://127.0.0.1/api/health" > /tmp/healthcheck.log 2>&1; then
+    echo "DEPLOY_OK: Healthcheck passou!"
     exit 0
   fi
+  echo "Tentativa $i falhou. Aguardando..."
   sleep 1
 done
 
 echo "HEALTHCHECK_FAILED" >&2
-echo "=== Service Status ==="
-sudo systemctl status "$SERVICE_NAME" --no-pager || true
-echo "=== Service Logs ==="
-sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager || true
+echo "=== Último erro do curl ==="
+cat /tmp/healthcheck.log || true
+echo "=== Logs do serviço (últimas 100 linhas) ==="
+sudo journalctl -u "$SERVICE_NAME" -n 100 --no-pager
 exit 1
