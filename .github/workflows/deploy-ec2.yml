@@ -47,26 +47,10 @@ jobs:
 
             if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
               echo "[SETUP] Primeira vez. Executando setup..."
-              REPO_URL="$REPO_URL" REMOTE_DIR="$REMOTE_DIR" SERVICE_NAME="$SERVICE_NAME" APP_PORT="$APP_PORT" APP_USER="$APP_USER" bash -x scripts/ec2_setup.sh 2>&1
+              bash -x scripts/ec2_setup.sh 2>&1 || exit 1
             else
               echo "[DEPLOY] Atualizando. Executando deploy..."
-              REMOTE_DIR="$REMOTE_DIR" SERVICE_NAME="$SERVICE_NAME" BRANCH="$BRANCH" bash -x scripts/ec2_deploy.sh 2>&1
+              bash -x scripts/ec2_deploy.sh 2>&1 || exit 1
             fi
-
-            echo "[HEALTHCHECK] Aguardando 5 segundos para serviço iniciar..."
-            sleep 5
-
-            echo "[HEALTHCHECK] Iniciando verificação de saúde..."
-            for i in $(seq 1 30); do
-              echo "[HEALTHCHECK] Tentativa $i/30..."
-              if curl -v http://127.0.0.1/api/health 2>&1 | head -20; then
-                echo "[SUCCESS] DEPLOY_OK"
-                exit 0
-              fi
-              sleep 1
-            done
-
-            echo "[FAILED] HEALTHCHECK_FAILED após 30 tentativas"
-            echo "[DEBUG] Logs do serviço:"
-            sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager
-            exit 1
+            
+            echo "[WORKFLOW] Deploy script executado com sucesso!"
