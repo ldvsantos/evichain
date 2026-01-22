@@ -5,13 +5,11 @@ Servidor Flask simples apenas para testar busca
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import sys
 import os
-
-# Adicionar o diretório atual ao path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from pathlib import Path
 
 from blockchain_simulator import EviChainBlockchain
+from evichain import load_settings
 
 app = Flask(__name__)
 CORS(app)
@@ -150,11 +148,14 @@ def get_stats():
         }), 500
 
 if __name__ == '__main__':
+    settings = load_settings(project_root=Path(__file__).resolve().parent)
+    port = int(os.getenv('FLASK_SEARCH_PORT', '5001'))
+
     print("\n🔍 EviChain Search Server")
-    print("🔗 http://localhost:5000")
+    print(f"🔗 http://localhost:{port}")
     print("📊 Endpoints disponíveis:")
     print("   GET /api/search?query=termo")
     print("   GET /api/stats")
     print()
-    
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
+    app.run(host=settings.host, port=port, debug=settings.debug)

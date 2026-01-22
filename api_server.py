@@ -1,44 +1,62 @@
 #!/usr/bin/env python3
+"""EviChain API Server.
+
+Este arquivo continua sendo um entrypoint executável, mas agora a configuração
+e a composição de serviços foram centralizadas no pacote `evichain` para reduzir
+acoplamento e deixar a arquitetura mais profissional.
 """
-EviChain API Server (Versão Final Definitiva)
-"""
+
 from flask import Flask, request, jsonify, send_from_directory
-import os
 import json
 import re
 import time
 import uuid
 from datetime import datetime
 from collections import deque
+from pathlib import Path
 import traceback
-from blockchain_simulator import EviChainBlockchain, generate_complaint_id
-from ia_engine_openai_padrao import IAEngineOpenAIPadrao
-from assistente_denuncia import AssistenteDenuncia
-from investigador_digital import InvestigadorDigital
-from consultor_registros import ConsultorRegistrosProfissionais
 
-def load_env():
-    env_path = os.path.join(os.path.dirname(__file__), '.env')
-    if os.path.exists(env_path):
-        with open(env_path, 'r') as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith('#') and '=' in line:
-                    key, value = line.split('=', 1)
-                    os.environ[key] = value.strip('"').strip("'")
-        print("✅ Arquivo .env carregado com sucesso")
-    else:
-        print("⚠️ Arquivo .env não encontrado.")
+from blockchain_simulator import generate_complaint_id
+from evichain import Services, create_services, load_settings
 
-load_env()
 
 app = Flask(__name__)
 TRACE_BUFFER = deque(maxlen=120)
 
-# Inicializar componentes
-assistente = AssistenteDenuncia()
-investigador = InvestigadorDigital()
-consultor_registros = ConsultorRegistrosProfissionais()
+
+SERVICES: Services | None = None
+
+# Compatibilidade com o código existente: as rotas seguem usando estes nomes
+assistente = None
+investigador = None
+consultor_registros = None
+evichain = None
+ia_engine = None
+
+
+def init_app() -> None:
+    """Inicializa settings + services e injeta em variáveis globais (compat)."""
+
+    global SERVICES, assistente, investigador, consultor_registros, evichain, ia_engine
+
+    settings = load_settings(project_root=Path(__file__).resolve().parent)
+    app.config["EVICHAIN_PROJECT_ROOT"] = str(settings.project_root)
+    app.config["EVICHAIN_HOST"] = settings.host
+    app.config["EVICHAIN_PORT"] = settings.port
+    app.config["EVICHAIN_DEBUG"] = settings.debug
+
+    SERVICES = create_services(settings)
+    app.extensions["evichain_services"] = SERVICES
+
+    assistente = SERVICES.assistente
+    investigador = SERVICES.investigador
+    consultor_registros = SERVICES.consultor_registros
+    evichain = SERVICES.blockchain
+    ia_engine = SERVICES.ia_engine
+
+
+def get_project_root() -> Path:
+    return Path(app.config.get("EVICHAIN_PROJECT_ROOT", Path(__file__).resolve().parent)).resolve()
 
 def log_trace(trace_id, stage, detail=""):
     timestamp = datetime.now().isoformat()
@@ -122,17 +140,32 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
     return response
 
-evichain = EviChainBlockchain(data_file="blockchain_data.json")
-ia_engine = IAEngineOpenAIPadrao()
-
 @app.route("/")
-def serve_index(): return send_from_directory(".", "index.html")
+def serve_index():
+    return send_from_directory(str(get_project_root()), "index.html")
 
 @app.route("/dashboard.html")
-def serve_dashboard(): return send_from_directory(".", "dashboard.html")
+def serve_dashboard():
+    return send_from_directory(str(get_project_root()), "dashboard.html")
 
 @app.route("/<path:path>")
-def serve_static_files(path): return send_from_directory(".", path)
+def serve_static_files(path):
+    return send_from_directory(str(get_project_root()), path)
+
+
+@app.route("/api/health", methods=["GET"])
+def healthcheck():
+    total_blocks = 0
+    try:
+        if evichain is not None:
+            total_blocks = len(getattr(evichain, "chain", []))
+    except Exception:
+        total_blocks = 0
+    return jsonify({"success": True, "status": "ok", "total_blocks": total_blocks})
+
+
+# Inicializa settings/services no import para manter compatibilidade com `python api_server.py`
+init_app()
 
 @app.route('/api/submit-complaint', methods=['POST'])
 def submit_complaint():
@@ -1268,9 +1301,13 @@ if __name__ == '__main__':
     print(f"🔗 Acesso principal: http://localhost:5000")
     print(f"📊 Dashboard: http://localhost:5000/dashboard.html")
     print("=======================================================")
+
+    host = app.config.get("EVICHAIN_HOST", "0.0.0.0")
+    port = int(app.config.get("EVICHAIN_PORT", 5000))
+    debug = bool(app.config.get("EVICHAIN_DEBUG", False))
     
     try:
         from waitress import serve
-        serve(app, host='0.0.0.0', port=5000)
+        serve(app, host=host, port=port)
     except ImportError:
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        app.run(host=host, port=port, debug=debug)
