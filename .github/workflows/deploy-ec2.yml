@@ -43,11 +43,13 @@ jobs:
             set -e
             if [ "$SERVICE_EXISTS" = "0" ]; then
               echo "[DEPLOY] Atualizando código..."
-              python3 -m pip install -q -U pip setuptools wheel || true
+              python3 -m venv .venv
+              . .venv/bin/activate
+              python -m pip install -q -U pip setuptools wheel
               pip install -q -r requirements.txt || exit 1
               pip install -q gunicorn || true
               echo "[PYTHON] Testando importação..."
-              python3 -c "import sys; sys.path.insert(0, '.'); import api_server; print('OK')" || exit 1
+              python -c "import sys; sys.path.insert(0, '.'); import api_server; print('OK')" || exit 1
               echo "[SERVICE] Reiniciando..."
               sudo systemctl restart "$SERVICE_NAME"
               sleep 3
