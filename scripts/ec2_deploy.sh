@@ -32,8 +32,12 @@ for i in $(seq 1 30); do
     echo "DEPLOY_OK"
     exit 0
   fi
-  sleep 0.5
+  sleep 1
 done
 
 echo "HEALTHCHECK_FAILED" >&2
+echo "=== Service Status ==="
+sudo systemctl status "$SERVICE_NAME" --no-pager || true
+echo "=== Service Logs ==="
+sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager || true
 exit 1
