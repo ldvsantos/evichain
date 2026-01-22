@@ -18,72 +18,50 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT || 22 }}
           script_stop: true
           script: |
+            bash << 'DEPLOY_SCRIPT'
             set -exu
-            
-            # Variáveis padrão
             REMOTE_DIR="/opt/evichain"
             BRANCH="main"
             SERVICE_NAME="evichain"
-            APP_PORT="8000"
             REPO_URL="git@github.com:ldvsantos/evichain_poc-.git"
-            
             echo "====== [WORKFLOW] Iniciando deploy ======"
-            echo "[WORKFLOW] REMOTE_DIR=$REMOTE_DIR"
-            echo "[WORKFLOW] SERVICE_NAME=$SERVICE_NAME"
-            echo "[WORKFLOW] BRANCH=$BRANCH"
-            
-            # Clone se não existir
             if [ ! -d "$REMOTE_DIR/.git" ]; then
               echo "[GIT] Primeira clonagem..."
               sudo mkdir -p "$REMOTE_DIR"
               sudo chown -R "$USER:$USER" "$REMOTE_DIR"
               git clone "$REPO_URL" "$REMOTE_DIR"
             fi
-            
-            # Atualiza repositório
             cd "$REMOTE_DIR"
             echo "[GIT] Atualizando repositório..."
             git fetch --prune
             git reset --hard origin/"$BRANCH"
-            echo "[GIT] ✓ Atualização concluída"
-            
-            # Verifica se é primeira instalação
+            echo "[GIT] Atualização concluída"
             SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
             if test ! -f "$SERVICE_FILE"; then
-              echo "[SETUP] Primeira instalação. Executando setup..."
-              bash scripts/ec2_setup.sh || { echo "[ERROR] Setup falhou"; exit 1; }
+              echo "[SETUP] Primeira instalação..."
+              bash scripts/ec2_setup.sh
             else
-              echo "[DEPLOY] Atualizando código e reiniciando..."
-              
-              # Deploy inline aqui
-              echo "[PIP] Instalando dependências..."
+              echo "[DEPLOY] Atualizando código..."
               python3 -m pip install -q -U pip setuptools wheel || true
-              pip install -q -r requirements.txt || { echo "[ERROR] Pip install falhou"; exit 1; }
+              pip install -q -r requirements.txt || exit 1
               pip install -q gunicorn || true
-              
               echo "[PYTHON] Testando importação..."
-              python3 -c "import sys; sys.path.insert(0, '.'); import api_server; print('[IMPORT] ✓ OK')" || { echo "[ERROR] Import falhou"; exit 1; }
-              
-              echo "[SERVICE] Reiniciando $SERVICE_NAME..."
+              python3 -c "import sys; sys.path.insert(0, '.'); import api_server; print('OK')" || exit 1
+              echo "[SERVICE] Reiniciando..."
               sudo systemctl restart "$SERVICE_NAME"
-              
-              echo "[WAIT] Aguardando 3 segundos..."
               sleep 3
-              
-              echo "[HEALTHCHECK] Verificando saúde..."
-              for i in {1..15}; do
-                echo "[CHECK] Tentativa $i/15..."
+              echo "[HEALTHCHECK] Verificando..."
+              for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+                echo "Tentativa $i/15..."
                 if curl -sf http://127.0.0.1/api/health > /dev/null 2>&1; then
-                  echo "[SUCCESS] ✓ Healthcheck passou!"
+                  echo "SUCESSO"
                   exit 0
                 fi
                 sleep 1
               done
-              
-              echo "[ERROR] ✗ Healthcheck falhou"
-              echo "[DEBUG] Logs do serviço:"
+              echo "FALHOU"
               sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager || true
               exit 1
             fi
-            
-            echo "[WORKFLOW] ✓ Deploy concluído com sucesso!"
+            echo "Deploy OK"
+            DEPLOY_SCRIPT
