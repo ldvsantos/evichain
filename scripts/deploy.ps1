@@ -25,6 +25,9 @@ param(
   [string]$Branch = '',
 
   [Parameter(Mandatory = $false)]
+  [switch]$Init,
+
+  [Parameter(Mandatory = $false)]
   [switch]$SkipGit,
 
   [Parameter(Mandatory = $false)]
@@ -43,6 +46,18 @@ $ErrorActionPreference = 'Stop'
 function Fail([string]$Message) {
   Write-Host "ERRO: $Message" -ForegroundColor Red
   exit 1
+}
+
+function ConvertToSshRepoUrl([string]$Url) {
+  if (-not $Url) { return $Url }
+  if ($Url -match '^git@') { return $Url }
+
+  # https://github.com/owner/repo.git  ->  git@github.com:owner/repo.git
+  if ($Url -match '^https://github\.com/(?<owner>[^/]+)/(?<repo>[^/]+?)(?:\.git)?$') {
+    return "git@github.com:$($Matches['owner'])/$($Matches['repo']).git"
+  }
+
+  return $Url
 }
 
 function TestTcpPort {
@@ -94,10 +109,15 @@ if (Test-Path $configPath) {
       if ($cfg.ContainsKey('RemoteDir')) { $RemoteDir = [string]$cfg['RemoteDir'] }
       if ($cfg.ContainsKey('Service'))   { $Service = [string]$cfg['Service'] }
       if ($cfg.ContainsKey('Branch'))    { $Branch = [string]$cfg['Branch'] }
+      if ($cfg.ContainsKey('AppPort'))   { $script:AppPort = [int]$cfg['AppPort'] }
     }
   } catch {
     Fail ("Falha ao carregar ${configPath}: " + $_.Exception.Message)
   }
+}
+
+if (-not (Get-Variable -Name AppPort -Scope Script -ErrorAction SilentlyContinue)) {
+  $script:AppPort = 8000
 }
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -134,7 +154,7 @@ try {
       Fail 'Git não encontrado. Instale o Git ou rode com -SkipGit.'
     }
 
-    $isRepo = git rev-parse --is-inside-work-tree 2>$null
+    git rev-parse --is-inside-work-tree 2>$null | Out-Null
     if ($LASTEXITCODE -ne 0) { Fail 'Esta pasta não parece ser um repositório Git.' }
 
     $statusPorcelain = git status --porcelain
@@ -177,7 +197,14 @@ try {
   $repoUrl = (git remote get-url origin).Trim()
   if (-not $repoUrl) { Fail 'Não foi possível detectar o remote origin.' }
 
-  Write-Host "Deploy remoto: git pull + restart ($Service)" -ForegroundColor Cyan
+  $repoSshUrl = ConvertToSshRepoUrl $repoUrl
+  if (-not $repoSshUrl) { Fail 'Não foi possível detectar o remote origin (SSH).' }
+
+  if ($Init) {
+    Write-Host "Deploy remoto: SETUP (primeira vez)" -ForegroundColor Cyan
+  } else {
+    Write-Host "Deploy remoto: deploy incremental" -ForegroundColor Cyan
+  }
 
   $remoteScript = @'
 set -euo pipefail
@@ -187,6 +214,8 @@ BRANCH="__BRANCH__"
 SERVICE_NAME="__SERVICE__"
 REPO_URL="__REPO_URL__"
 APP_USER="__APP_USER__"
+APP_PORT="__APP_PORT__"
+FORCE_SETUP="__FORCE_SETUP__"
 
 if [ ! -d "$REMOTE_DIR/.git" ]; then
   sudo mkdir -p "$REMOTE_DIR"
@@ -196,22 +225,16 @@ fi
 
 cd "$REMOTE_DIR"
 
+git remote set-url origin "$REPO_URL" || true
+
 git fetch --prune
-
 git checkout "$BRANCH"
-
 git pull --rebase origin "$BRANCH"
 
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -U pip
-python -m pip install -r requirements.txt
-
-sudo systemctl restart "$SERVICE_NAME" || true
-
-# Se nginx estiver instalado, garante que está rodando
-if command -v nginx >/dev/null 2>&1; then
-  sudo systemctl restart nginx || true
+if [ "$FORCE_SETUP" = "1" ] || [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
+  REPO_URL="$REPO_URL" REMOTE_DIR="$REMOTE_DIR" SERVICE_NAME="$SERVICE_NAME" APP_PORT="$APP_PORT" APP_USER="$APP_USER" bash scripts/ec2_setup.sh
+else
+  REMOTE_DIR="$REMOTE_DIR" SERVICE_NAME="$SERVICE_NAME" BRANCH="$BRANCH" bash scripts/ec2_deploy.sh
 fi
 
 # Healthcheck via localhost (nginx)
@@ -230,8 +253,10 @@ exit 1
   $remoteScript = $remoteScript.Replace('__REMOTE_DIR__', $RemoteDir)
   $remoteScript = $remoteScript.Replace('__BRANCH__', $Branch)
   $remoteScript = $remoteScript.Replace('__SERVICE__', $Service)
-  $remoteScript = $remoteScript.Replace('__REPO_URL__', $repoUrl)
+  $remoteScript = $remoteScript.Replace('__REPO_URL__', $repoSshUrl)
   $remoteScript = $remoteScript.Replace('__APP_USER__', $User)
+  $remoteScript = $remoteScript.Replace('__APP_PORT__', [string]$script:AppPort)
+  $remoteScript = $remoteScript.Replace('__FORCE_SETUP__', $(if ($Init) { '1' } else { '0' }))
 
   # Normaliza quebras de linha para LF
   $remoteScriptContent = ($remoteScript -replace "`r`n", "`n") -replace "`r", ""

@@ -25,6 +25,9 @@ Thumbs.db
 .env.*
 !.env.example
 
+# Deploy local (NÃO versionar)
+scripts/deploy-config.ps1
+
 # AWS / SSH keys (NUNCA commitar)
 *.pem
 *.ppk

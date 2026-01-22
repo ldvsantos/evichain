@@ -19,7 +19,7 @@ if [[ -z "$REPO_URL" ]]; then
 fi
 
 sudo apt update
-sudo apt -y install python3-venv python3-pip nginx git
+sudo apt -y install python3-venv python3-pip nginx git curl
 
 if [[ ! -d "$REMOTE_DIR/.git" ]]; then
   sudo mkdir -p "$REMOTE_DIR"

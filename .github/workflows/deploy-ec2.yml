@@ -20,9 +20,17 @@ jobs:
           script: |
             set -euo pipefail
             REMOTE_DIR="${{ secrets.EC2_REMOTE_DIR }}"
+            if [ -z "$REMOTE_DIR" ]; then REMOTE_DIR="/opt/evichain"; fi
             BRANCH="main"
             SERVICE_NAME="${{ secrets.EC2_SERVICE_NAME }}"
-            REPO_URL="${{ github.server_url }}/${{ github.repository }}.git"
+            if [ -z "$SERVICE_NAME" ]; then SERVICE_NAME="evichain"; fi
+            APP_USER="${{ secrets.EC2_APP_USER }}"
+            if [ -z "$APP_USER" ]; then APP_USER="${{ secrets.EC2_USER }}"; fi
+            APP_PORT="${{ secrets.EC2_APP_PORT }}"
+            if [ -z "$APP_PORT" ]; then APP_PORT="8000"; fi
+
+            # Clona via SSH (usa a deploy key já configurada na EC2)
+            REPO_URL="git@github.com:${{ github.repository }}.git"
 
             if [ ! -d "$REMOTE_DIR/.git" ]; then
               sudo mkdir -p "$REMOTE_DIR"
@@ -31,17 +39,16 @@ jobs:
             fi
 
             cd "$REMOTE_DIR"
+            git remote set-url origin "$REPO_URL" || true
             git fetch --prune
             git checkout "$BRANCH"
             git pull --rebase origin "$BRANCH"
 
-            python3 -m venv .venv
-            . .venv/bin/activate
-            python -m pip install -U pip
-            python -m pip install -r requirements.txt
-
-            sudo systemctl restart "$SERVICE_NAME" || true
-            sudo systemctl restart nginx || true
+            if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
+              REPO_URL="$REPO_URL" REMOTE_DIR="$REMOTE_DIR" SERVICE_NAME="$SERVICE_NAME" APP_PORT="$APP_PORT" APP_USER="$APP_USER" bash scripts/ec2_setup.sh
+            else
+              REMOTE_DIR="$REMOTE_DIR" SERVICE_NAME="$SERVICE_NAME" BRANCH="$BRANCH" bash scripts/ec2_deploy.sh
+            fi
 
             for i in $(seq 1 30); do
               if curl -fsS http://127.0.0.1/api/health >/dev/null 2>&1; then
