@@ -18,7 +18,7 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT || 22 }}
           script_stop: true
           script: |
-            set -exuo pipefail
+            set -exu
             
             # Variáveis padrão
             REMOTE_DIR="/opt/evichain"
@@ -48,20 +48,21 @@ jobs:
             echo "[GIT] ✓ Atualização concluída"
             
             # Verifica se é primeira instalação
-            if [ ! -f "/etc/systemd/system/${SERVICE_NAME}.service" ]; then
+            SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+            if test ! -f "$SERVICE_FILE"; then
               echo "[SETUP] Primeira instalação. Executando setup..."
-              bash scripts/ec2_setup.sh
+              bash scripts/ec2_setup.sh || { echo "[ERROR] Setup falhou"; exit 1; }
             else
               echo "[DEPLOY] Atualizando código e reiniciando..."
               
               # Deploy inline aqui
               echo "[PIP] Instalando dependências..."
-              python3 -m pip install -q -U pip setuptools wheel
-              pip install -q -r requirements.txt
-              pip install -q gunicorn
+              python3 -m pip install -q -U pip setuptools wheel || true
+              pip install -q -r requirements.txt || { echo "[ERROR] Pip install falhou"; exit 1; }
+              pip install -q gunicorn || true
               
               echo "[PYTHON] Testando importação..."
-              python3 -c "import sys; sys.path.insert(0, '.'); import api_server; print('[IMPORT] ✓ OK')"
+              python3 -c "import sys; sys.path.insert(0, '.'); import api_server; print('[IMPORT] ✓ OK')" || { echo "[ERROR] Import falhou"; exit 1; }
               
               echo "[SERVICE] Reiniciando $SERVICE_NAME..."
               sudo systemctl restart "$SERVICE_NAME"
@@ -81,7 +82,7 @@ jobs:
               
               echo "[ERROR] ✗ Healthcheck falhou"
               echo "[DEBUG] Logs do serviço:"
-              sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager
+              sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager || true
               exit 1
             fi
             
