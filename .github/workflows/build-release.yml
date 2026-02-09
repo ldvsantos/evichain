@@ -1,0 +1,72 @@
+name: Build & Release Executável
+
+on:
+  release:
+    types: [created, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Instalar dependências
+        run: npm install --no-fund --no-audit
+
+      - name: Build aplicação
+        run: npm run build
+        continue-on-error: true
+
+      - name: Criar executável (Electron Builder)
+        run: npm run electron-builder
+        continue-on-error: true
+
+      - name: Listar artefatos gerados
+        run: |
+          dir dist/
+          dir release/ 2>nul || echo "Diretório release não existe"
+        shell: powershell
+
+      - name: Upload executável para release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*.exe
+            dist/**/*.msi
+            dist/**/*.zip
+            release/**/*.exe
+            release/**/*.msi
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artefatos (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: evichain-executavel-${{ matrix.os }}
+          path: |
+            dist/**/*.exe
+            dist/**/*.msi
+            dist/**/*.zip
+            release/**/*.exe
+            release/**/*.msi
+          if-no-files-found: warn

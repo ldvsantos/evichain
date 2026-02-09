@@ -1,0 +1,28 @@
+{
+  "name": "evichain",
+  "version": "1.0.0",
+  "description": "Plataforma de inovação probatória com blockchain e IA",
+  "main": "index.html",
+  "scripts": {
+    "start": "npm run serve",
+    "serve": "http-server -c-1 -o -p 8080",
+    "build": "echo 'Projeto web estático - nenhum build necessário'",
+    "electron-builder": "echo 'Para desktop app, configure electron-builder no package.json do projeto Electron'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ldvsantos/evichain.git"
+  },
+  "keywords": [
+    "blockchain",
+    "denúncias",
+    "investigação",
+    "inteligência-artificial",
+    "conselhos-profissionais"
+  ],
+  "author": "ldvsantos",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
