@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EviChain — Inovação Probatória com Blockchain e IA</title>
+  <meta name="description" content="Plataforma de inteligência investigativa que integra blockchain, IA e investigação digital para garantir a integridade de evidências em processos disciplinares.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+  <!-- ─── NAVBAR ─── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a class="nav-brand" href="index.html">
+        <svg class="brand-icon" width="32" height="32" viewBox="0 0 512 512">
+          <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e40af"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>
+          <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+          <path d="M256 84c-54 42-108 52-162 64v120c0 99 68 156 162 196 94-40 162-97 162-196V148c-54-12-108-22-162-64z" fill="#fff" fill-opacity=".92"/>
+          <path d="M240 308l-48-48 20-20 28 28 60-60 20 20-80 80z" fill="#1e40af"/>
+        </svg>
+        <span class="brand-name">EviChain</span>
+      </a>
+      <button class="nav-toggle" aria-label="Menu" id="navToggle">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-menu" id="navMenu">
+        <a href="#problema" class="nav-link">O Problema</a>
+        <a href="#solucao" class="nav-link">Solução</a>
+        <a href="#tecnologia" class="nav-link">Tecnologia</a>
+        <a href="#segmentos" class="nav-link">Segmentos</a>
+        <a href="#roadmap" class="nav-link">Roadmap</a>
+        <div class="nav-actions">
+          <a href="https://github.com/ldvsantos/evichain" target="_blank" rel="noopener" class="nav-btn nav-btn-outline">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 00-3.8 23.38c.6.11.82-.26.82-.58v-2.16c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.31 1.23a11.5 11.5 0 016.04 0c2.3-1.55 3.31-1.23 3.31-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0012 .3"/></svg>
+            GitHub
+          </a>
+          <a href="https://github.com/ldvsantos/evichain/releases/latest" class="nav-btn nav-btn-outline" title="Download Desktop">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="12" x2="12" y2="3"/></svg>
+            Download
+          </a>
+          <a href="web/index.html" class="nav-btn nav-btn-solid">Acessar Plataforma</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section class="hero">
+    <div class="hero-bg-wrap">
+      <div class="hero-gradient"></div>
+      <div class="hero-particles" id="particles"></div>
+      <div class="hero-grid-lines"></div>
+    </div>
+    <div class="container hero-grid">
+      <div class="hero-text">
+        <div class="hero-chip">
+          <span class="chip-dot"></span>
+          Proof of Concept — Open Source
+        </div>
+        <h1>Inovação probatória com <span class="text-accent">blockchain<br>e inteligência artificial</span></h1>
+        <p class="hero-sub">Plataforma de inteligência investigativa que garante a autenticidade de evidências em denúncias, fortalecendo a confiabilidade e efetividade dos processos disciplinares em conselhos profissionais.</p>
+        <div class="hero-ctas">
+          <a href="#solucao" class="btn btn-primary">Explorar a Plataforma</a>
+          <a href="https://github.com/ldvsantos/evichain/releases/latest" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Desktop
+          </a>
+          <a href="https://github.com/ldvsantos/evichain" target="_blank" rel="noopener" class="btn btn-ghost">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 00-3.8 23.38c.6.11.82-.26.82-.58v-2.16c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.31 1.23a11.5 11.5 0 016.04 0c2.3-1.55 3.31-1.23 3.31-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0012 .3"/></svg>
+            Ver no GitHub
+          </a>
+        </div>
+        <div class="hero-metrics">
+          <div class="metric" data-target="256" data-suffix="-bit">
+            <span class="metric-value">0-bit</span>
+            <span class="metric-label">SHA-256 Hash</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric" data-target="100" data-suffix="%">
+            <span class="metric-value">0%</span>
+            <span class="metric-label">Imutável</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric" data-target="0" data-suffix="">
+            <span class="metric-value">0</span>
+            <span class="metric-label">Adulterações</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-mockup">
+          <div class="blockchain-visual">
+            <div class="chain-block" style="animation-delay:0s">
+              <div class="block-icon">🔒</div>
+              <div class="block-label">Denúncia</div>
+              <div class="block-hash">0x3b82f6…e9a1</div>
+            </div>
+            <div class="chain-connector"></div>
+            <div class="chain-block" style="animation-delay:.3s">
+              <div class="block-icon">🧠</div>
+              <div class="block-label">Análise IA</div>
+              <div class="block-hash">0x1d4ed8…7c2f</div>
+            </div>
+            <div class="chain-connector"></div>
+            <div class="chain-block" style="animation-delay:.6s">
+              <div class="block-icon">🔗</div>
+              <div class="block-label">Blockchain</div>
+              <div class="block-hash">0x2563eb…d4b8</div>
+            </div>
+            <div class="chain-connector"></div>
+            <div class="chain-block" style="animation-delay:.9s">
+              <div class="block-icon">🔍</div>
+              <div class="block-label">Investigação</div>
+              <div class="block-hash">0x1e40af…a3c5</div>
+            </div>
+          </div>
+          <div class="mockup-glow"></div>
+        </div>
+      </div>
+    </div>
+    <a href="#problema" class="hero-scroll-hint" aria-label="Ver mais">
+      <span>Conheça o desafio</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </a>
+  </section>
+
+  <!-- ─── PROBLEMAS ─── -->
+  <section id="problema" class="section bg-light">
+    <div class="container">
+      <header class="section-head">
+        <span class="tag">O Desafio</span>
+        <h2>Por que processos disciplinares ainda falham?</h2>
+        <p>Evidências frágeis, processos manuais e falta de rastreabilidade comprometem a efetividade da fiscalização profissional.</p>
+      </header>
+      <div class="grid-3 stagger">
+        <article class="card-problem rv">
+          <div class="card-icon">📋</div>
+          <h3>Denúncias arquivadas</h3>
+          <p>Milhares de denúncias são arquivadas por falta de provas consistentes e verificáveis nos conselhos profissionais.</p>
+        </article>
+        <article class="card-problem rv">
+          <div class="card-icon">🔓</div>
+          <h3>Falta de transparência</h3>
+          <p>Processos opacos e lentos geram desconfiança na sociedade sobre a efetividade dos órgãos fiscalizadores.</p>
+        </article>
+        <article class="card-problem rv">
+          <div class="card-icon">⏱️</div>
+          <h3>Processos lentos</h3>
+          <p>Análise manual de evidências torna os processos disciplinares demorados, ineficientes e custosos.</p>
+        </article>
+        <article class="card-problem rv">
+          <div class="card-icon">🔀</div>
+          <h3>Evidências adulteráveis</h3>
+          <p>Sem mecanismos de integridade, provas podem ser questionadas judicialmente e perder valor probatório.</p>
+        </article>
+        <article class="card-problem rv">
+          <div class="card-icon">🕵️</div>
+          <h3>Investigação manual</h3>
+          <p>Verificação de registros profissionais em bases oficiais depende de consultas individuais e demoradas.</p>
+        </article>
+        <article class="card-problem rv">
+          <div class="card-icon">⚖️</div>
+          <h3>Insegurança jurídica</h3>
+          <p>Ausência de cadeia de custódia digital e rastreabilidade fragiliza os processos em instâncias jurídicas.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SOLUÇÃO (pipeline) ─── -->
+  <section id="solucao" class="section bg-dark">
+    <div class="container">
+      <header class="section-head light">
+        <span class="tag tag-light">A Solução</span>
+        <h2>Da denúncia ao dossiê: fluxo inteligente</h2>
+        <p>Cada etapa integra IA, blockchain e automação para máxima robustez probatória.</p>
+      </header>
+      <div class="pipeline">
+        <div class="pipe-step rv">
+          <div class="pipe-number">1</div>
+          <div class="pipe-card glass">
+            <h4>Captação de Denúncia</h4>
+            <p>Portal seguro para recepção de denúncias com formulário inteligente, suporte a anonimato e categorização automática.</p>
+          </div>
+        </div>
+        <div class="pipe-step rv">
+          <div class="pipe-number">2</div>
+          <div class="pipe-card glass">
+            <h4>Qualificação por IA</h4>
+            <p>Engine OpenAI analisa o relato, verifica elementos essenciais (quem, quando, onde) e sugere enriquecimento dos dados.</p>
+          </div>
+        </div>
+        <div class="pipe-step rv">
+          <div class="pipe-number">3</div>
+          <div class="pipe-card glass">
+            <h4>Registro em Blockchain</h4>
+            <p>Evidências registradas com hash SHA-256 e Proof of Work, garantindo imutabilidade e cadeia de custódia digital.</p>
+          </div>
+        </div>
+        <div class="pipe-step rv">
+          <div class="pipe-number">4</div>
+          <div class="pipe-card glass">
+            <h4>Investigação Digital</h4>
+            <p>Robô investigador varre bases oficiais (CONFEF, CFM) e redes sociais para cruzar dados e validar registros.</p>
+          </div>
+        </div>
+        <div class="pipe-step rv">
+          <div class="pipe-number">5</div>
+          <div class="pipe-card glass">
+            <h4>Análise de Texto</h4>
+            <p>IA analisa e estrutura informações textuais, identifica padrões e classifica a gravidade automaticamente.</p>
+          </div>
+        </div>
+        <div class="pipe-step rv">
+          <div class="pipe-number">6</div>
+          <div class="pipe-card glass">
+            <h4>Dossiê Probatório</h4>
+            <p>Geração automática de relatório consolidado com todas as evidências, análises e cadeia de custódia para tomada de decisão.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TECNOLOGIA ─── -->
+  <section id="tecnologia" class="section section-bg-gradient">
+    <div class="container">
+      <header class="section-head">
+        <span class="tag">Tecnologia</span>
+        <h2>Stack de ponta para máxima confiabilidade</h2>
+      </header>
+      <div class="grid-3 stagger">
+        <article class="card-tech rv">
+          <div class="tech-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><rect x="3" y="11" width="5" height="7" rx="1"/><rect x="10" y="6" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/><path d="M3 21h18"/></svg>
+          </div>
+          <span class="tech-num">01</span>
+          <h3>Blockchain Simulador</h3>
+          <p>Registros com hash SHA-256, Proof of Work e validação de cadeia completa. Cada evidência é imutável e verificável.</p>
+        </article>
+        <article class="card-tech rv">
+          <div class="tech-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4m10-10h-4M6 12H2m15.07-7.07l-2.83 2.83M9.76 14.24l-2.83 2.83m0-10.14l2.83 2.83m4.48 4.48l2.83 2.83"/></svg>
+          </div>
+          <span class="tech-num">02</span>
+          <h3>IA — OpenAI Engine</h3>
+          <p>Análise e qualificação de denúncias, estruturação de textos, sugestões de enriquecimento e classificação automática.</p>
+        </article>
+        <article class="card-tech rv">
+          <div class="tech-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6m-3-3h6"/></svg>
+          </div>
+          <span class="tech-num">03</span>
+          <h3>Investigador Digital</h3>
+          <p>Robô que varre bases oficiais (CONFEF, CFM, OAB) e redes sociais para cruzar dados e gerar dossiês automatizados.</p>
+        </article>
+        <article class="card-tech rv">
+          <div class="tech-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span class="tech-num">04</span>
+          <h3>Cadeia de Custódia</h3>
+          <p>Cada ação gera registro imutável com timestamp, hash e prova de integridade para validade jurídica plena.</p>
+        </article>
+        <article class="card-tech rv">
+          <div class="tech-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <span class="tech-num">05</span>
+          <h3>Denúncia Anônima</h3>
+          <p>Suporte completo a anonimato com proteção de identidade do denunciante e testemunhas em todo o fluxo.</p>
+        </article>
+        <article class="card-tech rv">
+          <div class="tech-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+          </div>
+          <span class="tech-num">06</span>
+          <h3>PWA Multiplataforma</h3>
+          <p>Interface responsiva e progressiva que funciona em qualquer dispositivo — web, mobile e desktop — com acesso offline.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ARQUITETURA ─── -->
+  <section class="section bg-dark">
+    <div class="container">
+      <header class="section-head light">
+        <span class="tag tag-light">Arquitetura</span>
+        <h2>Ecossistema integrado e modular</h2>
+        <p>Backend Python (Flask), frontend dinâmico, IA via OpenAI e persistência segura.</p>
+      </header>
+      <div class="arch-grid stagger">
+        <div class="arch-card glass rv">
+          <div class="arch-icon">🐍</div>
+          <h4>Backend Python / Flask</h4>
+          <p>API REST robusta com endpoints para denúncias, busca, investigação e blockchain.</p>
+        </div>
+        <div class="arch-card glass rv">
+          <div class="arch-icon">🤖</div>
+          <h4>OpenAI GPT Engine</h4>
+          <p>Engine de IA para qualificação, análise de texto e assistente de denúncias.</p>
+        </div>
+        <div class="arch-card glass rv">
+          <div class="arch-icon">⛓️</div>
+          <h4>Blockchain Simulator</h4>
+          <p>Cadeia de blocos com SHA-256, PoW, validação e persistência JSON.</p>
+        </div>
+        <div class="arch-card glass rv">
+          <div class="arch-icon">🌐</div>
+          <h4>Frontend HTML/JS</h4>
+          <p>Dashboard interativo, portal de denúncias e central de investigação.</p>
+        </div>
+        <div class="arch-card glass rv">
+          <div class="arch-icon">🔍</div>
+          <h4>Search Server</h4>
+          <p>Busca inteligente em registros profissionais e bases de dados oficiais.</p>
+        </div>
+        <div class="arch-card glass rv">
+          <div class="arch-icon">📊</div>
+          <h4>Dashboard Analytics</h4>
+          <p>Visualização em tempo real de métricas, denúncias e cadeia de custódia.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SEGMENTOS ─── -->
+  <section id="segmentos" class="section bg-light">
+    <div class="container">
+      <header class="section-head">
+        <span class="tag">Segmentos</span>
+        <h2>Para quem fiscaliza e protege a sociedade</h2>
+        <p>De conselhos profissionais a ouvidorias públicas. Onde houver necessidade de integridade probatória, a EviChain resolve.</p>
+      </header>
+      <div class="segments-mosaic stagger">
+        <div class="seg-tile rv">🏋️<span>CREF / CONFEF</span></div>
+        <div class="seg-tile seg-dark rv">⚕️<span>CRM / CFM</span></div>
+        <div class="seg-tile seg-accent rv">⚖️<span>OAB</span></div>
+        <div class="seg-tile rv">🏛️<span>Ouvidorias</span></div>
+        <div class="seg-tile seg-warm rv">🔬<span>CRQ / CFQ</span></div>
+        <div class="seg-tile rv">📐<span>CREA / CONFEA</span></div>
+        <div class="seg-tile seg-accent rv">🎵<span>Conselhos de Classe</span></div>
+        <div class="seg-tile seg-dark rv">🏥<span>CRF / CFF</span></div>
+        <div class="seg-tile rv">📋<span>Agências Reguladoras</span></div>
+        <div class="seg-tile seg-warm rv">🛡️<span>Compliance</span></div>
+        <div class="seg-tile seg-dark rv">🏢<span>Corregedorias</span></div>
+        <div class="seg-tile rv">🌐<span>Gov Digital</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ROADMAP ─── -->
+  <section id="roadmap" class="section">
+    <div class="container">
+      <header class="section-head">
+        <span class="tag">Evolução</span>
+        <h2>Plano de evolução do produto</h2>
+      </header>
+      <div class="grid-3 stagger">
+        <article class="card-road rv">
+          <div class="road-phase">Curto prazo</div>
+          <div class="road-period">M1 a M4</div>
+          <ul>
+            <li>PoC funcional com blockchain e IA integrados</li>
+            <li>Portal de denúncias com assistente inteligente</li>
+            <li>Investigador digital para bases CONFEF/CFM</li>
+            <li>Dashboard com métricas em tempo real</li>
+          </ul>
+        </article>
+        <article class="card-road rv">
+          <div class="road-phase">Médio prazo</div>
+          <div class="road-period">M5 a M8</div>
+          <ul>
+            <li>Integração com mais conselhos (OAB, CRM, CREA)</li>
+            <li>API REST pública para parceiros</li>
+            <li>Módulo de compliance e LGPD</li>
+            <li>Pilotos com conselhos parceiros</li>
+          </ul>
+        </article>
+        <article class="card-road rv">
+          <div class="road-phase">Longo prazo</div>
+          <div class="road-period">M9 a M12</div>
+          <ul>
+            <li>Blockchain distribuído real (Hyperledger)</li>
+            <li>App mobile nativo para denunciantes</li>
+            <li>Analytics preditivo e IA generativa avançada</li>
+            <li>Expansão nacional e internacionalização</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA ─── -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <div class="container">
+        <h2>Pronto para revolucionar a fiscalização profissional?</h2>
+        <p>Conheça a EviChain e descubra como blockchain e IA podem dar robustez probatória às denúncias do seu conselho.</p>
+        <div class="cta-actions">
+          <a href="web/index.html" class="btn btn-white">Acessar Plataforma</a>
+          <a href="https://github.com/ldvsantos/evichain/releases/latest" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Desktop
+          </a>
+          <a href="https://github.com/ldvsantos/evichain" target="_blank" rel="noopener" class="btn btn-ghost-w">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 00-3.8 23.38c.6.11.82-.26.82-.58v-2.16c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1.01-.32 3.31 1.23a11.5 11.5 0 016.04 0c2.3-1.55 3.31-1.23 3.31-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0012 .3"/></svg>
+            Ver Código-Fonte
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <svg width="36" height="36" viewBox="0 0 512 512">
+          <defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e40af"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>
+          <rect width="512" height="512" rx="96" fill="url(#fg)"/>
+          <path d="M256 84c-54 42-108 52-162 64v120c0 99 68 156 162 196 94-40 162-97 162-196V148c-54-12-108-22-162-64z" fill="#fff" fill-opacity=".92"/>
+          <path d="M240 308l-48-48 20-20 28 28 60-60 20 20-80 80z" fill="#1e40af"/>
+        </svg>
+        <div>
+          <strong>EviChain</strong>
+          <span>Inovação Probatória</span>
+        </div>
+      </div>
+      <div class="footer-copy">
+        <p>Blockchain · Inteligência Artificial · Investigação Digital</p>
+        <p>Plataforma open source para integridade de evidências</p>
+        <p>&copy; 2025–2026 EviChain. Todos os direitos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="landing.js"></script>
+</body>
+</html>
