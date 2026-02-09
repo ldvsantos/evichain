@@ -162,6 +162,8 @@ ul{list-style:none}
 .btn{display:inline-flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;padding:12px 28px;border-radius:var(--r-full);transition:var(--ease);cursor:pointer;border:none}
 .btn-primary{background:var(--b500);color:#fff}
 .btn-primary:hover{background:var(--b700);transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,130,246,.35)}
+.btn-secondary{background:rgba(59,130,246,.15);color:#fff;border:1.5px solid var(--b500)}
+.btn-secondary:hover{background:var(--b500);transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,130,246,.3)}
 .btn-ghost{color:rgba(255,255,255,.8);border:1.5px solid rgba(255,255,255,.25)}
 .btn-ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.5);color:#fff}
 .btn-ghost-w{color:rgba(255,255,255,.85);border:1.5px solid rgba(255,255,255,.3)}

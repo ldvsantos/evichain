@@ -10,49 +10,75 @@ permissions:
   actions: read
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [windows-latest]
-      fail-fast: false
-    runs-on: ${{ matrix.os }}
+  build-windows:
+    name: Build Windows (.exe)
+    runs-on: windows-latest
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          node-version: '18'
-          cache: 'npm'
+          python-version: '3.11'
+          cache: 'pip'
 
       - name: Instalar dependências
-        run: npm install --no-fund --no-audit
-
-      - name: Build aplicação
-        run: npm run build
-        continue-on-error: true
-
-      - name: Criar executável (Electron Builder)
-        run: npm run electron-builder
-        continue-on-error: true
-
-      - name: Listar artefatos gerados
         run: |
-          dir dist/
-          dir release/ 2>nul || echo "Diretório release não existe"
-        shell: powershell
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Criar executável com PyInstaller
+        run: |
+          pyinstaller --noconfirm --onefile --name EviChain `
+            --add-data "web;web" `
+            --add-data "data;data" `
+            --add-data "evichain;evichain" `
+            --add-data "index.html;." `
+            --add-data "landing.css;." `
+            --add-data "landing.js;." `
+            --hidden-import flask `
+            --hidden-import flask_cors `
+            --hidden-import waitress `
+            --hidden-import requests `
+            --hidden-import openai `
+            --hidden-import bs4 `
+            --hidden-import lxml `
+            --hidden-import json `
+            --hidden-import blockchain_simulator `
+            --hidden-import assistente_denuncia `
+            --hidden-import busca_real_confef `
+            --hidden-import consultor_registros `
+            --hidden-import detector_nomes `
+            --hidden-import ia_analisador_texto `
+            --hidden-import ia_engine_openai_padrao `
+            --hidden-import investigador_digital `
+            --hidden-import search_server `
+            --collect-all evichain `
+            api_server.py
+        shell: pwsh
+
+      - name: Verificar artefato
+        run: |
+          Get-ChildItem dist/ -Recurse
+          $size = (Get-Item dist/EviChain.exe).Length / 1MB
+          Write-Host "Tamanho do executável: $([math]::Round($size, 2)) MB"
+        shell: pwsh
+
+      - name: Criar ZIP para distribuição
+        run: |
+          $version = if ($env:GITHUB_REF -match 'refs/tags/(.+)') { $Matches[1] } else { 'dev' }
+          Compress-Archive -Path dist/EviChain.exe -DestinationPath "dist/EviChain-${version}-windows-x64.zip"
+        shell: pwsh
 
       - name: Upload executável para release
         if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/**/*.exe
-            dist/**/*.msi
-            dist/**/*.zip
-            release/**/*.exe
-            release/**/*.msi
+            dist/EviChain.exe
+            dist/EviChain-*.zip
           draft: false
           prerelease: false
         env:
@@ -62,11 +88,8 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: evichain-executavel-${{ matrix.os }}
+          name: EviChain-windows-x64
           path: |
-            dist/**/*.exe
-            dist/**/*.msi
-            dist/**/*.zip
-            release/**/*.exe
-            release/**/*.msi
+            dist/EviChain.exe
+            dist/EviChain-*.zip
           if-no-files-found: warn
