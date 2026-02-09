@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>EviChain Dashboard - Análise Inteligente de Denúncias</title>
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="brand">
+                <a class="brand-link" href="../index.html" aria-label="EviChain">
+                    <img class="brand-logo" src="assets/brand/logo.png" alt="EVIChain">
+                    <span class="brand-name">EVIChain</span>
+                </a>
+                <span class="brand-title">Dashboard</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-outline" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i>
+                    Atualizar Dados
+                </button>
+                <button class="btn btn-warning" onclick="openInvestigationPage()">
+                    <i class="fas fa-search"></i>
+                    Central de Investigação
+                </button>
+                <button class="btn btn-primary" onclick="exportReport()">
+                    <i class="fas fa-download"></i>
+                    Exportar Relatório
+                </button>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Stats Overview -->
+        <section class="stats-section">
+            <div class="container">
+                <h2 class="section-title">Visão Geral do Sistema</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalComplaints">0</div>
+                            <div class="stat-label">Total de Denúncias</div>
+                            <div class="stat-change positive">+12% este mês</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalBlocks">0</div>
+                            <div class="stat-label">Blocos na Blockchain</div>
+                            <div class="stat-change positive">100% validados</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="highRiskCases">0</div>
+                            <div class="stat-label">Casos de Alto Risco</div>
+                            <div class="stat-change negative">Requer atenção</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">98.5%</div>
+                            <div class="stat-label">Precisão da IA</div>
+                            <div class="stat-change positive">+2.1% melhoria</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="container">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Denúncias por Conselho</h3>
+                        <canvas id="conselhosChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Categorias de Denúncias</h3>
+                        <canvas id="categoriasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Analysis Section -->
+        <section class="ai-analysis-section">
+            <div class="container">
+                <h2 class="section-title">Análise Inteligente da Última Denúncia</h2>
+                <div class="analysis-container" id="analysisContainer">
+                    <div class="analysis-placeholder">
+                        <i class="fas fa-brain"></i>
+                        <p>Selecione uma denúncia para ver a análise da IA</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Complaints Table -->
+        <section class="complaints-section">
+            <div class="container">
+                <h2 class="section-title">Denúncias Registradas</h2>
+                <div class="table-container">
+                    <table class="complaints-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Conselho</th>
+                                <th>Categoria</th>
+                                <th>Risco</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="complaintsTableBody">
+                            <!-- Dados serão carregados via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blockchain Info -->
+        <section class="blockchain-section">
+            <div class="container">
+                <h2 class="section-title">Informações da Blockchain</h2>
+                <div class="blockchain-grid">
+                    <div class="blockchain-card">
+                        <h3>Status da Rede</h3>
+                        <div class="blockchain-status">
+                            <div class="status-item">
+                                <span class="label">Hash do Último Bloco:</span>
+                                <span class="value hash" id="latestBlockHash">Carregando...</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Dificuldade:</span>
+                                <span class="value" id="difficulty">2</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Transações Pendentes:</span>
+                                <span class="value" id="pendingTransactions">0</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="label">Integridade da Chain:</span>
+                                <span class="value status-valid" id="chainValid">✓ Válida</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="blockchain-card">
+                        <h3>Últimas Transações</h3>
+                        <div class="transactions-list" id="recentTransactions">
+                            <!-- Transações serão carregadas via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal para Detalhes da Denúncia -->
+    <div class="modal" id="complaintModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detalhes da Denúncia</h3>
+                <div class="modal-actions">
+                    <button class="btn btn-primary btn-sm" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i>
+                        Gerar PDF
+                    </button>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Conteúdo será carregado dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Carregando dados da blockchain...</p>
+        </div>
+    </div>
+
+    <script src="/pwa.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

@@ -32,8 +32,9 @@
 ## Links
 
 - [Landing Page](https://ldvsantos.github.io/evichain/)
-- [Demo (PoC)](https://ldvsantos.github.io/evichain_poc-/)
-- [Repositório PoC](https://github.com/ldvsantos/evichain_poc-)
+- [Plataforma Demo](https://ldvsantos.github.io/evichain/web/)
+- [Dashboard](https://ldvsantos.github.io/evichain/web/dashboard.html)
+- [Repositório](https://github.com/ldvsantos/evichain)
 
 ## Licença
 

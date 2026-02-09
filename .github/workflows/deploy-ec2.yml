@@ -1,0 +1,73 @@
+name: Deploy EC2
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            bash << 'DEPLOY_SCRIPT'
+            set -exu
+            REMOTE_DIR="/opt/evichain"
+            BRANCH="main"
+            SERVICE_NAME="evichain"
+            REPO_URL="git@github.com:ldvsantos/evichain_poc-.git"
+            echo "====== [WORKFLOW] Iniciando deploy ======"
+            if [ ! -d "$REMOTE_DIR/.git" ]; then
+              echo "[GIT] Primeira clonagem..."
+              sudo mkdir -p "$REMOTE_DIR"
+              sudo chown -R "$USER:$USER" "$REMOTE_DIR"
+              git clone "$REPO_URL" "$REMOTE_DIR"
+            fi
+            cd "$REMOTE_DIR"
+            echo "[GIT] Atualizando repositório..."
+            git fetch --prune
+            git reset --hard origin/"$BRANCH"
+            echo "[GIT] Atualização concluída"
+            SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+            set +e
+            test -f "$SERVICE_FILE"
+            SERVICE_EXISTS=$?
+            set -e
+            if [ "$SERVICE_EXISTS" = "0" ]; then
+              echo "[DEPLOY] Atualizando código..."
+              python3 -m venv .venv
+              . .venv/bin/activate
+              python -m pip install -q -U pip setuptools wheel
+              pip install -q -r requirements.txt || exit 1
+              pip install -q gunicorn || true
+              echo "[PYTHON] Testando importação..."
+              python -c "import sys; sys.path.insert(0, '.'); import api_server; print('OK')" || exit 1
+              echo "[SERVICE] Reiniciando..."
+              sudo systemctl restart "$SERVICE_NAME"
+              sleep 3
+              echo "[HEALTHCHECK] Verificando..."
+              for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+                echo "Tentativa $i/15..."
+                if curl -sf http://127.0.0.1/api/health > /dev/null 2>&1; then
+                  echo "SUCESSO"
+                  exit 0
+                fi
+                sleep 1
+              done
+              echo "FALHOU"
+              sudo journalctl -u "$SERVICE_NAME" -n 50 --no-pager || true
+              exit 1
+            else
+              echo "[SETUP] Primeira instalação..."
+              bash scripts/ec2_setup.sh
+            fi
+            echo "Deploy OK"
+            DEPLOY_SCRIPT

@@ -1,0 +1,178 @@
+================================================================
+                    EVICHAIN - SISTEMA ESSENCIAL
+         Plataforma de Denúncias com Investigação Digital
+================================================================
+
+INSTALACAO:
+-----------
+pip install -r requirements.txt
+
+
+INICIAR:
+--------
+python api_server.py
+
+
+ACESSAR:
+--------
+📋 Sistema Principal: http://localhost:5000
+📊 Dashboard: http://localhost:5000/dashboard.html
+🔍 Investigador Digital: http://localhost:5000/investigador.html
+
+
+VERIFICAR OPENAI:
+-----------------
+Ao iniciar, deve aparecer:
+[INFO] IA OpenAI inicializada com sucesso
+
+Se aparecer erro, verifique o arquivo .env
+
+
+NOVAS FUNCIONALIDADES:
+---------------------
+🔍 INVESTIGADOR DIGITAL:
+- Busca em redes sociais (Facebook, Instagram, LinkedIn, Twitter)
+- Verificação de registros profissionais oficiais
+- Extração de nome completo e formação do registro
+- Busca geral na internet
+- Geração de relatórios investigativos
+- DESTINADO PARA ÓRGÃOS PÚBLICOS INVESTIGATIVOS
+
+📋 CONSULTOR DE REGISTROS:
+- Consulta específica nos sistemas dos conselhos
+- Extração automática de dados oficiais:
+  * Nome completo oficial
+  * Número de registro completo
+  * Situação do registro (ativo/inativo)
+  * Formação e especialidades
+  * Cidade de registro
+- Suporte aos principais conselhos:
+  * CRM (Medicina) - consulta real via API CFM
+  * OAB (Advocacia)
+  * CREA (Engenharia)
+  * CRP (Psicologia)
+  * CRO (Odontologia)
+  * CREF (Educação Física)
+
+
+ARQUIVOS:
+---------
+Backend (8):
+- api_server.py
+- assistente_denuncia.py
+- ia_engine_openai_padrao.py
+- ia_analisador_texto.py
+- blockchain_simulator.py
+- investigador_digital.py (NOVO)
+- consultor_registros.py (NOVO)
+- teste_consultor.py (NOVO)
+
+Frontend (7):
+- index.html
+- dashboard.html
+- investigador.html (NOVO)
+- styles.css
+- dashboard.css
+- script.js
+- dashboard.js
+
+Dados (5):
+- .env
+- .env.investigacao.example (NOVO)
+- blockchain_data.json
+- legislacao_conselhos.json
+- requirements.txt
+
+
+ENDPOINTS API:
+--------------
+📋 Sistema Principal:
+- POST /api/submit-complaint
+- GET /api/complaints
+- GET /api/blockchain-info
+- POST /api/assistente/analisar
+
+🔍 Investigação Digital:
+- POST /api/investigacao/iniciar
+- POST /api/investigacao/buscar-redes-sociais
+- POST /api/registros/consultar (NOVO)
+- POST /api/investigacao/relatorio/{formato}
+
+
+EXEMPLO DE USO - CONSULTA DE REGISTRO:
+-------------------------------------
+Dados de Entrada:
+{
+  "nome": "João Silva Santos",
+  "registro": "123456",
+  "conselho": "CRM"
+}
+
+Resposta Esperada:
+{
+  "registro_encontrado": true,
+  "dados_profissional": {
+    "nome_completo_oficial": "Dr. João Silva Santos",
+    "registro_crm_completo": "123456 - SP",
+    "situacao_registro": "ATIVO",
+    "especialidades_registradas": ["Cardiologia"],
+    "tipo_formacao": "Medicina",
+    "cidade_registro": "São Paulo"
+  },
+  "formacao_detalhada": {
+    "formacao_principal": "Medicina",
+    "especialidades": ["Cardiologia"],
+    "titulos_adicionais": ["RQE: 12345"]
+  }
+}
+
+
+CONFIGURAÇÃO DE APIS (OPCIONAL):
+--------------------------------
+Para funcionalidades avançadas, configure em .env:
+- GOOGLE_API_KEY (busca geral)
+- FACEBOOK_ACCESS_TOKEN (perfis públicos)
+- LINKEDIN_ACCESS_TOKEN (perfis profissionais)
+- TWITTER_BEARER_TOKEN (posts públicos)
+
+O sistema funciona sem essas APIs, fornecendo links para busca manual.
+
+
+ASPECTOS LEGAIS E ÉTICOS:
+-------------------------
+⚖️ USO RESTRITO: Sistema destinado EXCLUSIVAMENTE para órgãos públicos
+⚖️ DADOS PÚBLICOS: Foco em informações já disponíveis publicamente
+⚖️ TRANSPARÊNCIA: Documentação completa das fontes consultadas
+⚖️ LGPD: Respeito à legislação de proteção de dados
+
+
+TESTES:
+-------
+Para testar o consultor de registros:
+python teste_consultor.py
+
+
+PRONTO! Sistema completo e funcional.
+
+================================================================
+
+
+CONFIGURAÇÃO EM OUTRAS MÁQUINAS:
+--------------------------------
+1) Crie seu arquivo .env a partir do modelo:
+    Copie .env.example para .env e preencha a sua OPENAI_API_KEY
+
+2) Instale dependências:
+    pip install -r requirements.txt
+
+3) Inicie o servidor:
+    python api_server.py
+
+4) Acesse:
+    http://localhost:5000
+
+Observações:
+- O arquivo .env não é versionado por segurança.
+- Se ao iniciar aparecer "[INFO] IA OpenAI inicializada com sucesso", está OK.
+- Em caso de erro, revise a OPENAI_API_KEY no .env e a versão do pacote openai.
+
