@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>EviChain - Plataforma de Inovação Probatória</title>
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon.svg">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="styles.css?v=2.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a class="nav-brand" href="/" aria-label="EviChain">
+                <img class="brand-logo" src="/assets/brand/logo.png" alt="EVIChain">
+                <span class="brand-title">EVIChain</span>
+            </a>
+            <button class="nav-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" data-mobile-nav-toggle>
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="nav-links" data-mobile-nav-links>
+                <a href="/">Início</a>
+                <a href="#sobre">Sobre</a>
+                <a href="#como-funciona">Como Funciona</a>
+                <a href="#demo">Demo</a>
+                <a href="/dashboard.html">Dashboard</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Revolucionando a <span class="highlight">Transparência</span> 
+                    nos Conselhos Profissionais
+                </h1>
+                <p class="hero-subtitle">
+                    A EviChain é uma plataforma digital segura que utiliza blockchain e inteligência artificial 
+                    para garantir a autenticidade de evidências em denúncias, fortalecendo a confiabilidade 
+                    e efetividade dos processos disciplinares.
+                </p>
+                <div class="hero-buttons">
+                    <a href="/dashboard.html" class="btn btn-primary">
+                        <i class="fas fa-play"></i>
+                        Testar Plataforma
+                    </a>
+                    <a href="#sobre" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        Saiba Mais
+                    </a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="blockchain-animation">
+                    <div class="block" style="animation-delay: 0s;"></div>
+                    <div class="block" style="animation-delay: 0.5s;"></div>
+                    <div class="block" style="animation-delay: 1s;"></div>
+                    <div class="connector"></div>
+                    <div class="connector" style="animation-delay: 0.5s;"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem" id="sobre">
+        <div class="container">
+            <h2 class="section-title">O Problema que Resolvemos</h2>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Denúncias Arquivadas</h3>
+                    <p>Muitas denúncias sérias são arquivadas por falta de provas consistentes e verificáveis.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3>Falta de Transparência</h3>
+                    <p>Processos opacos geram desconfiança na sociedade sobre a efetividade dos conselhos.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Processos Lentos</h3>
+                    <p>Análise manual de evidências torna os processos disciplinares demorados e ineficientes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution" id="como-funciona">
+        <div class="container">
+            <h2 class="section-title">Nossa Solução Inovadora</h2>
+            <div class="solution-grid">
+                <div class="solution-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Registro Seguro</h3>
+                        <p>Denúncias e evidências são registradas na plataforma com criptografia avançada e validação automática via blockchain.</p>
+                        <div class="step-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="solution-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Validação Blockchain</h3>
+                        <p>Cada evidência recebe um hash único e imutável, garantindo autenticidade e rastreabilidade completa.</p>
+                        <div class="step-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="solution-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Análise Inteligente</h3>
+                        <p>IA organiza informações, identifica padrões e gera relatórios estruturados para agilizar a tomada de decisão.</p>
+                        <div class="step-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">Recursos Principais</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-shield-check"></i>
+                    <h3>Segurança Máxima</h3>
+                    <p>Criptografia de ponta e blockchain garantem a integridade das evidências.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-users"></i>
+                    <h3>Colaboração Anônima</h3>
+                    <p>Testemunhas podem contribuir de forma segura e anônima para fortalecer os casos.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Relatórios Inteligentes</h3>
+                    <p>IA gera análises detalhadas e identifica padrões para apoiar decisões.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Acesso Multiplataforma</h3>
+                    <p>Interface responsiva funciona em qualquer dispositivo, web ou mobile.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="demo-section">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2><i class="fas fa-edit"></i> Registro Seguro de Denúncia</h2>
+                    <p>Utilize o formulário abaixo para registrar sua denúncia. As informações serão validadas por IA e registradas na blockchain.</p>
+                </div>
+                
+                <form id="complaintForm" class="complaint-form">
+                    <div class="form-group">
+                        <label for="titulo">Título da Denúncia</label>
+                        <input type="text" id="titulo" name="titulo" placeholder="Ex: Erro médico em procedimento" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nomeDenunciado">Nome do Profissional Denunciado *</label>
+                        <input type="text" id="nomeDenunciado" name="nomeDenunciado" placeholder="Ex: Dr. João Silva ou Maria Santos" required>
+                        <small class="form-help">
+                            <i class="fas fa-info-circle"></i> 
+                            Informe o nome completo do profissional para facilitar a identificação e investigação precisa.
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="assunto">Assunto *</label>
+                        <input type="text" id="assunto" name="assunto" placeholder="Digite o assunto da solicitação" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prioridade">Prioridade</label>
+                            <select id="prioridade" name="prioridade">
+                                <option value="">Selecione a prioridade</option>
+                                <option value="Baixa">Baixa</option>
+                                <option value="Média">Média</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Urgente">Urgente</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="finalidade">Finalidade *</label>
+                            <select id="finalidade" name="finalidade" required>
+                                <option value="">Selecione a finalidade</option>
+                                <option value="Denúncia">Denúncia</option>
+                                <option value="Reclamação">Reclamação</option>
+                                <option value="Sugestão">Sugestão</option>
+                                <option value="Informação">Informação</option>
+                                <option value="Elogio">Elogio</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoria">Categoria da Denúncia</label>
+                            <select id="categoria" name="categoria">
+                                <option value="Negligência">Negligência</option>
+                                <option value="Assédio">Assédio</option>
+                                <option value="Exercício Ilegal">Exercício Ilegal</option>
+                                <option value="Fraude em Estágio">Fraude em Estágio</option>
+                                <option value="Outras">Outras</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="conselho">Conselho Profissional</label>
+                            <select id="conselho" name="conselho">
+                                <option value="CREF20">CREF20 (Conselho Federal)</option>
+                                <option value="CONFEF">CONFEF (Conselho Federal)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="descricao">Descrição Detalhada</label>
+                        <textarea id="descricao" name="descricao" rows="6" placeholder="Descreva detalhadamente o ocorrido." required></textarea>
+                        <div class="assistente-actions">
+                            <button type="button" id="btnAnalisarTexto" class="btn-assistente">
+                                <i class="fas fa-magic"></i> Analisar e Melhorar Texto
+                            </button>
+                            <span id="contadorCaracteres" class="contador">0 caracteres</span>
+                        </div>
+                    </div>
+
+                    <!-- Área de sugestões do assistente -->
+                    <div id="areaSugestoes" class="area-sugestoes" style="display: none;">
+                        <div class="sugestoes-header">
+                            <h4><i class="fas fa-robot"></i> Assistente de IA</h4>
+                            <button type="button" id="btnFecharSugestoes" class="btn-fechar-sugestoes">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="conteudoSugestoes" class="conteudo-sugestoes">
+                            <!-- Conteúdo será inserido aqui -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="codigosAnteriores">Cód. Anteriores</label>
+                        <input type="text" id="codigosAnteriores" name="codigosAnteriores" placeholder="Se este assunto já foi solicitado antes, informe os códigos">
+                        <small class="form-help">Exemplo: #12345, #67890</small>
+                    </div>
+
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="ouvidoriaAnonima" name="ouvidoriaAnonima">
+                        <label for="ouvidoriaAnonima">Ouvidoria anônima: A solicitação será anônima, porém ela poderá não ser atendida.</label>
+                    </div>
+                    
+                    <div class="form-group-checkbox">
+                        <input type="checkbox" id="anonymous" name="anonymous" checked>
+                        <label for="anonymous">Manter anonimato</label>
+                    </div>
+
+                    <div id="formMessage" class="form-message"></div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-full">
+                            <i class="fas fa-paper-plane"></i> Enviar Denúncia com Segurança
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2024 EviChain. Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="/pwa.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

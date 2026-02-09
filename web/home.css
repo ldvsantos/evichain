@@ -1,0 +1,547 @@
+/* =====================================================
+   EviChain — Página Inicial do Sistema (home.css)
+   ===================================================== */
+
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #1f2937;
+    background: #f0f4f8;
+    min-height: 100vh;
+}
+
+.sys-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ── Header ────────────────────────────────────────── */
+.sys-header {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.sys-header-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+}
+
+.sys-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sys-brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.sys-brand-logo {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+}
+
+.sys-brand-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #1e40af;
+    letter-spacing: -0.02em;
+}
+
+.sys-brand-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.sys-nav {
+    display: flex;
+    gap: 6px;
+}
+
+.sys-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #4b5563;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sys-nav-link:hover {
+    background: #f3f4f6;
+    color: #1e40af;
+}
+
+.sys-nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: #4b5563;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.sys-nav-toggle:hover {
+    background: #f3f4f6;
+}
+
+/* Mobile Nav */
+.sys-mobile-nav {
+    display: none;
+    flex-direction: column;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 8px 24px 16px;
+    gap: 4px;
+}
+
+.sys-mobile-nav.open {
+    display: flex;
+}
+
+.sys-mobile-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.sys-mobile-link:hover {
+    background: #f3f4f6;
+    color: #1e40af;
+}
+
+/* ── Welcome Banner ────────────────────────────────── */
+.sys-welcome {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%);
+    color: #fff;
+    padding: 48px 0 40px;
+}
+
+.sys-welcome-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+}
+
+.sys-welcome-text h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.sys-highlight {
+    color: #93c5fd;
+}
+
+.sys-welcome-text p {
+    font-size: 1.05rem;
+    opacity: 0.88;
+    max-width: 600px;
+    line-height: 1.6;
+}
+
+.sys-welcome-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.sys-mini-stat {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    padding: 18px 24px;
+    text-align: center;
+    min-width: 110px;
+}
+
+.sys-mini-stat-value {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.sys-mini-stat-label {
+    display: block;
+    font-size: 0.78rem;
+    opacity: 0.75;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.sys-status-dot {
+    font-size: 0.6rem;
+    color: #34d399;
+    vertical-align: middle;
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ── Modules Grid ──────────────────────────────────── */
+.sys-modules {
+    padding: 48px 0 32px;
+}
+
+.sys-section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 24px;
+}
+
+.sys-modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+}
+
+.sys-module-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.sys-module-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.09);
+    border-color: #93c5fd;
+}
+
+.sys-module-card.sys-module-primary {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    color: #fff;
+    border-color: transparent;
+}
+
+.sys-module-card.sys-module-primary .sys-module-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.sys-module-card.sys-module-primary p {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.sys-module-card.sys-module-primary .sys-module-arrow {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.sys-module-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    background: #eff6ff;
+    color: #1e40af;
+}
+
+.sys-icon-blue { background: #dbeafe; color: #1d4ed8; }
+.sys-icon-amber { background: #fef3c7; color: #b45309; }
+.sys-icon-green { background: #d1fae5; color: #047857; }
+.sys-icon-purple { background: #ede9fe; color: #6d28d9; }
+.sys-icon-teal { background: #ccfbf1; color: #0d9488; }
+
+.sys-module-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sys-module-info h3 {
+    font-size: 1.05rem;
+    font-weight: 650;
+    margin-bottom: 4px;
+}
+
+.sys-module-info p {
+    font-size: 0.85rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.sys-module-arrow {
+    color: #9ca3af;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.sys-module-card:hover .sys-module-arrow {
+    transform: translateX(4px);
+}
+
+/* ── Activity Section ──────────────────────────────── */
+.sys-activity {
+    padding: 24px 0 56px;
+}
+
+.sys-activity-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+}
+
+.sys-activity-list {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    min-height: 200px;
+}
+
+.sys-activity-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    height: 160px;
+    color: #9ca3af;
+    font-size: 0.95rem;
+}
+
+.sys-activity-empty i {
+    font-size: 1.6rem;
+    color: #3b82f6;
+}
+
+.sys-activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.sys-activity-item:last-child {
+    border-bottom: none;
+}
+
+.sys-activity-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.sys-badge-blue { background: #dbeafe; color: #1d4ed8; }
+.sys-badge-green { background: #d1fae5; color: #047857; }
+.sys-badge-amber { background: #fef3c7; color: #b45309; }
+.sys-badge-red { background: #fee2e2; color: #b91c1c; }
+
+.sys-activity-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.sys-activity-text strong {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.sys-activity-text p {
+    font-size: 0.88rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.sys-activity-time {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Quick Actions */
+.sys-quick-actions {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sys-quick-actions h3 {
+    font-size: 1rem;
+    font-weight: 650;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.sys-quick-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sys-quick-btn:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1e40af;
+}
+
+.sys-quick-btn.sys-quick-primary {
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+
+.sys-quick-btn.sys-quick-primary:hover {
+    box-shadow: 0 4px 14px rgba(30, 64, 175, 0.35);
+}
+
+/* ── Footer ────────────────────────────────────────── */
+.sys-footer {
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+    padding: 20px 0;
+}
+
+.sys-footer-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.sys-footer-links {
+    display: flex;
+    gap: 20px;
+}
+
+.sys-footer-links a {
+    color: #6b7280;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.sys-footer-links a:hover {
+    color: #1e40af;
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 768px) {
+    .sys-nav { display: none; }
+    .sys-nav-toggle { display: block; }
+
+    .sys-welcome-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+    }
+
+    .sys-welcome-text h1 {
+        font-size: 1.5rem;
+    }
+
+    .sys-welcome-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sys-mini-stat {
+        padding: 14px 12px;
+        min-width: auto;
+        flex: 1;
+    }
+
+    .sys-mini-stat-value {
+        font-size: 1.2rem;
+    }
+
+    .sys-modules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sys-activity-wrapper {
+        grid-template-columns: 1fr;
+    }
+
+    .sys-footer-inner {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .sys-welcome { padding: 32px 0 28px; }
+    .sys-welcome-text h1 { font-size: 1.3rem; }
+    .sys-modules { padding: 32px 0 20px; }
+}

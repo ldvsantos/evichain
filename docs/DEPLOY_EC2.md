@@ -18,7 +18,7 @@ Passos:
 
 ```bash
 cd /opt/evichain
-REPO_URL=git@github.com:ldvsantos/evichain_poc-.git \
+REPO_URL=git@github.com:ldvsantos/evichain.git \
 REMOTE_DIR=/opt/evichain \
 SERVICE_NAME=evichain \
 APP_PORT=8000 \

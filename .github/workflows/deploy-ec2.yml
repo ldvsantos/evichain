@@ -23,7 +23,7 @@ jobs:
             REMOTE_DIR="/opt/evichain"
             BRANCH="main"
             SERVICE_NAME="evichain"
-            REPO_URL="git@github.com:ldvsantos/evichain_poc-.git"
+            REPO_URL="git@github.com:ldvsantos/evichain.git"
             echo "====== [WORKFLOW] Iniciando deploy ======"
             if [ ! -d "$REMOTE_DIR/.git" ]; then
               echo "[GIT] Primeira clonagem..."
