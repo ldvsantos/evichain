@@ -145,8 +145,29 @@ def after_request(response):
     return response
 
 @app.route("/")
-def serve_index():
-    return send_from_directory(str(get_web_root()), "index.html")
+def serve_landing():
+    """Serve a landing page (index.html da raiz do projeto)"""
+    return send_from_directory(str(get_project_root()), "index.html")
+
+@app.route("/landing.css")
+def serve_landing_css():
+    return send_from_directory(str(get_project_root()), "landing.css")
+
+@app.route("/landing.js")
+def serve_landing_js():
+    return send_from_directory(str(get_project_root()), "landing.js")
+
+@app.route("/icon.svg")
+def serve_icon_svg():
+    root = get_project_root()
+    if (root / "icon.svg").exists():
+        return send_from_directory(str(root), "icon.svg")
+    return send_from_directory(str(get_web_root()), "icon.svg")
+
+@app.route("/web/<path:path>")
+def serve_web_files(path):
+    """Serve arquivos do sistema (web/)"""
+    return send_from_directory(str(get_web_root()), path)
 
 @app.route("/nova-denuncia.html")
 def serve_nova_denuncia():
@@ -156,8 +177,16 @@ def serve_nova_denuncia():
 def serve_dashboard():
     return send_from_directory(str(get_web_root()), "dashboard.html")
 
+@app.route("/investigador.html")
+def serve_investigador():
+    return send_from_directory(str(get_web_root()), "investigador.html")
+
 @app.route("/<path:path>")
 def serve_static_files(path):
+    """Fallback: tenta raiz do projeto, depois web/"""
+    root = get_project_root()
+    if (root / path).is_file():
+        return send_from_directory(str(root), path)
     return send_from_directory(str(get_web_root()), path)
 
 
