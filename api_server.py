@@ -145,6 +145,10 @@ def after_request(response):
     return response
 
 @app.route("/")
+def serve_landing_root():
+    return send_from_directory(str(get_web_root()), "landing.html")
+
+@app.route("/index.html")
 def serve_index():
     return send_from_directory(str(get_web_root()), "index.html")
 
