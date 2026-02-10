@@ -792,16 +792,6 @@ def sync_push():
         print(f"[SYNC] Erro no push: {e}")
         traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
-            'complaint_id': latest_complaint.get('id', 'N/A'),
-            'full_analysis': latest_complaint.get('ia_analysis', {})
-        })
-    
-    except Exception as e:
-        print(f"[ERROR] Erro ao obter última análise: {e}")
-        return jsonify({
-            'success': False,
-            'error': str(e)
-        }), 500
 
 @app.route('/api/generate_pdf', methods=['POST'])
 def generate_pdf():
