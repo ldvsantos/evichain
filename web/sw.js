@@ -3,19 +3,22 @@
    - Network-first para navegação (sempre tenta atualizar)
 */
 
-const CACHE_VERSION = 'evichain-v1';
+const CACHE_VERSION = 'evichain-v2';
 
 const CORE_ASSETS = [
-  '/',
-  '/index.html',
-  '/dashboard.html',
-  '/investigador.html',
-  '/styles.css',
-  '/dashboard.css',
-  '/script.js',
-  '/dashboard.js',
-  '/manifest.json',
-  '/icon.svg'
+  './',
+  './index.html',
+  './dashboard.html',
+  './investigador.html',
+  './nova-denuncia.html',
+  './styles.css',
+  './home.css',
+  './dashboard.css',
+  './script.js',
+  './home.js',
+  './dashboard.js',
+  './manifest.json',
+  './icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
