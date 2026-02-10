@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>EviChain</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        width: 480px; height: 360px; overflow: hidden;
+        background: transparent; font-family: 'Segoe UI', sans-serif;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .splash {
+        width: 100%; height: 100%;
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8eef8 50%, #f5f7ff 100%);
+        border-radius: 16px;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        position: relative; overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .splash::before {
+        content: ''; position: absolute; top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle at 30% 40%, rgba(37,99,235,0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 60%, rgba(124,58,237,0.06) 0%, transparent 50%);
+        animation: glow 4s ease-in-out infinite;
+    }
+    @keyframes glow {
+        0%, 100% { opacity: 0.6; } 50% { opacity: 1; }
+    }
+    .logo-container {
+        position: relative; z-index: 1;
+        animation: fadeIn 1s ease;
+    }
+    .logo-icon {
+        width: 80px; height: 80px;
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        border-radius: 20px; display: flex;
+        align-items: center; justify-content: center;
+        margin: 0 auto 16px;
+        box-shadow: 0 8px 30px rgba(37,99,235,0.15);
+        animation: pulse 2s ease-in-out infinite;
+    }
+    .logo-icon svg { width: 48px; height: 48px; fill: white; }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .title {
+        font-size: 28px; font-weight: 700; color: #1e293b;
+        letter-spacing: 3px; text-align: center;
+        text-shadow: none;
+    }
+    .subtitle {
+        font-size: 11px; color: #475569; margin-top: 6px;
+        letter-spacing: 1px; text-align: center;
+    }
+    .progress-container {
+        position: relative; z-index: 1;
+        width: 220px; margin-top: 32px;
+    }
+    .progress-bar {
+        width: 100%; height: 3px;
+        background: rgba(0,0,0,0.06);
+        border-radius: 2px; overflow: hidden;
+    }
+    .progress-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, #2563eb, #7c3aed);
+        border-radius: 2px;
+        animation: fill 3s ease-in-out forwards;
+    }
+    @keyframes fill {
+        0% { width: 0%; }
+        30% { width: 40%; }
+        60% { width: 70%; }
+        90% { width: 90%; }
+        100% { width: 100%; }
+    }
+    .status {
+        font-size: 10px; color: #94a3b8;
+        margin-top: 10px; text-align: center;
+        position: relative; z-index: 1;
+        animation: statusChange 3s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .chain-dots {
+        position: absolute; bottom: 20px; left: 50%;
+        transform: translateX(-50%);
+        display: flex; gap: 8px; z-index: 1;
+    }
+    .chain-dot {
+        width: 6px; height: 6px;
+        background: #2563eb; border-radius: 50%;
+        animation: chainPulse 1.5s ease-in-out infinite;
+    }
+    .chain-dot:nth-child(2) { animation-delay: 0.2s; background: #4f46e5; }
+    .chain-dot:nth-child(3) { animation-delay: 0.4s; background: #7c3aed; }
+    .chain-dot:nth-child(4) { animation-delay: 0.6s; background: #8b5cf6; }
+    @keyframes chainPulse {
+        0%, 100% { opacity: 0.3; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.2); }
+    }
+</style>
+</head>
+<body>
+<div class="splash">
+    <div class="logo-container">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        </div>
+        <div class="title">EVICHAIN</div>
+        <div class="subtitle">PLATAFORMA DE INOVAÇÃO PROBATÓRIA</div>
+    </div>
+    <div class="progress-container">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+    </div>
+    <div class="status" id="status">Inicializando blockchain...</div>
+    <div class="chain-dots">
+        <div class="chain-dot"></div>
+        <div class="chain-dot"></div>
+        <div class="chain-dot"></div>
+        <div class="chain-dot"></div>
+    </div>
+</div>
+<script>
+    const msgs = ['Inicializando blockchain...', 'Carregando módulo de IA...', 'Verificando integridade da chain...', 'Quase pronto...'];
+    let i = 0;
+    setInterval(() => { if (i < msgs.length - 1) document.getElementById('status').textContent = msgs[++i]; }, 900);
+</script>
+</body>
+</html>

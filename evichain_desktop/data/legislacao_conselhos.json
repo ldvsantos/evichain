@@ -1,0 +1,270 @@
+{
+  "CRM": {
+    "nome_completo": "Conselho Regional de Medicina",
+    "codigo_etica": "Resolução CFM nº 2.217/2018",
+    "infrações": {
+      "negligencia": {
+        "gravidade": "grave",
+        "artigos": ["Art. 1º", "Art. 32"],
+        "descricao": "Deixar de atuar com o devido zelo profissional ou omitir-se em situação de urgência",
+        "penalidades": ["Advertência confidencial", "Censura confidencial", "Censura pública", "Suspensão do exercício profissional"],
+        "criterios_gravidade": {
+          "leve": "Negligência sem dano ao paciente",
+          "media": "Negligência com dano reversível",
+          "grave": "Negligência com dano permanente ou óbito"
+        }
+      },
+      "assedio": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 23", "Art. 109"],
+        "descricao": "Assédio moral ou sexual contra paciente, colega ou funcionário",
+        "penalidades": ["Suspensão do exercício profissional", "Cassação do exercício profissional"],
+        "criterios_gravidade": {
+          "grave": "Assédio moral comprovado",
+          "gravissima": "Assédio sexual ou reincidência"
+        }
+      },
+      "ma_conduta": {
+        "gravidade": "media",
+        "artigos": ["Art. 2º", "Art. 18"],
+        "descricao": "Conduta inadequada no exercício da profissão",
+        "penalidades": ["Advertência confidencial", "Censura confidencial"],
+        "criterios_gravidade": {
+          "leve": "Conduta inadequada isolada",
+          "media": "Conduta inadequada reiterada"
+        }
+      },
+      "fraude": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 87", "Art. 88"],
+        "descricao": "Falsificação de documentos, atestados ou receitas",
+        "penalidades": ["Suspensão do exercício profissional", "Cassação do exercício profissional"],
+        "criterios_gravidade": {
+          "grave": "Fraude sem dano direto",
+          "gravissima": "Fraude com dano ou benefício indevido"
+        }
+      }
+    }
+  },
+  "OAB": {
+    "nome_completo": "Ordem dos Advogados do Brasil",
+    "codigo_etica": "Lei nº 8.906/1994 e Código de Ética e Disciplina",
+    "infrações": {
+      "negligencia": {
+        "gravidade": "grave",
+        "artigos": ["Art. 32", "Art. 34, IV"],
+        "descricao": "Abandono de causa, perda de prazo ou desídia no patrocínio",
+        "penalidades": ["Censura", "Suspensão", "Exclusão"],
+        "criterios_gravidade": {
+          "media": "Perda de prazo sem prejuízo irreparável",
+          "grave": "Abandono de causa ou prejuízo grave ao cliente"
+        }
+      },
+      "assedio": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 34, XXVIII"],
+        "descricao": "Assédio moral ou sexual contra cliente, colega ou funcionário",
+        "penalidades": ["Suspensão", "Exclusão"],
+        "criterios_gravidade": {
+          "grave": "Assédio moral comprovado",
+          "gravissima": "Assédio sexual"
+        }
+      },
+      "ma_conduta": {
+        "gravidade": "media",
+        "artigos": ["Art. 34, V", "Art. 34, VII"],
+        "descricao": "Conduta incompatível com a advocacia ou captação de clientela",
+        "penalidades": ["Censura", "Suspensão"],
+        "criterios_gravidade": {
+          "leve": "Conduta inadequada isolada",
+          "media": "Captação de clientela ou conduta reiterada"
+        }
+      },
+      "fraude": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 34, X", "Art. 34, XI"],
+        "descricao": "Falsificação de documentos ou apropriação indébita",
+        "penalidades": ["Exclusão"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer tipo de fraude ou apropriação"
+        }
+      }
+    }
+  },
+  "CREA": {
+    "nome_completo": "Conselho Regional de Engenharia e Agronomia",
+    "codigo_etica": "Resolução nº 1.002/2002",
+    "infrações": {
+      "negligencia": {
+        "gravidade": "grave",
+        "artigos": ["Art. 10, alínea a", "Art. 10, alínea c"],
+        "descricao": "Imperícia, imprudência ou negligência no exercício profissional",
+        "penalidades": ["Advertência", "Multa", "Suspensão temporária", "Cancelamento do registro"],
+        "criterios_gravidade": {
+          "media": "Negligência sem risco à segurança",
+          "grave": "Negligência com risco à segurança ou dano estrutural"
+        }
+      },
+      "assedio": {
+        "gravidade": "grave",
+        "artigos": ["Art. 10, alínea h"],
+        "descricao": "Assédio moral ou sexual no ambiente de trabalho",
+        "penalidades": ["Multa", "Suspensão temporária"],
+        "criterios_gravidade": {
+          "grave": "Assédio moral ou sexual comprovado"
+        }
+      },
+      "ma_conduta": {
+        "gravidade": "media",
+        "artigos": ["Art. 10, alínea e"],
+        "descricao": "Conduta inadequada no exercício da profissão",
+        "penalidades": ["Advertência", "Multa"],
+        "criterios_gravidade": {
+          "leve": "Conduta inadequada isolada",
+          "media": "Conduta inadequada reiterada"
+        }
+      },
+      "fraude": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 10, alínea b", "Art. 10, alínea d"],
+        "descricao": "Falsificação de documentos técnicos ou ART",
+        "penalidades": ["Suspensão temporária", "Cancelamento do registro"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer tipo de falsificação"
+        }
+      }
+    }
+  },
+  "CRP": {
+    "nome_completo": "Conselho Regional de Psicologia",
+    "codigo_etica": "Resolução CFP nº 010/2005",
+    "infrações": {
+      "negligencia": {
+        "gravidade": "grave",
+        "artigos": ["Art. 1º, alínea c", "Art. 2º, alínea k"],
+        "descricao": "Negligência no atendimento ou abandono de paciente",
+        "penalidades": ["Advertência", "Multa", "Censura pública", "Suspensão", "Cassação"],
+        "criterios_gravidade": {
+          "media": "Negligência sem dano grave",
+          "grave": "Abandono de paciente ou dano psicológico"
+        }
+      },
+      "assedio": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 2º, alínea c", "Art. 2º, alínea j"],
+        "descricao": "Assédio sexual ou abuso da relação terapêutica",
+        "penalidades": ["Suspensão", "Cassação"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer forma de assédio ou abuso"
+        }
+      },
+      "ma_conduta": {
+        "gravidade": "media",
+        "artigos": ["Art. 1º, alínea a", "Art. 2º, alínea b"],
+        "descricao": "Violação do sigilo profissional ou conduta inadequada",
+        "penalidades": ["Advertência", "Multa", "Censura pública"],
+        "criterios_gravidade": {
+          "leve": "Conduta inadequada isolada",
+          "media": "Violação de sigilo ou conduta reiterada"
+        }
+      },
+      "fraude": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 1º, alínea f", "Art. 2º, alínea i"],
+        "descricao": "Falsificação de laudos ou documentos",
+        "penalidades": ["Suspensão", "Cassação"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer tipo de falsificação"
+        }
+      }
+    }
+  },
+  "CRO": {
+    "nome_completo": "Conselho Regional de Odontologia",
+    "codigo_etica": "Resolução CFO-118/2012",
+    "infrações": {
+      "negligencia": {
+        "gravidade": "grave",
+        "artigos": ["Art. 5º, IV", "Art. 6º, I"],
+        "descricao": "Negligência no atendimento ou erro técnico",
+        "penalidades": ["Advertência confidencial", "Censura confidencial", "Censura pública", "Suspensão", "Cassação"],
+        "criterios_gravidade": {
+          "media": "Negligência sem dano permanente",
+          "grave": "Negligência com dano permanente ou complicação grave"
+        }
+      },
+      "assedio": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 6º, III"],
+        "descricao": "Assédio moral ou sexual contra paciente ou funcionário",
+        "penalidades": ["Suspensão", "Cassação"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer forma de assédio"
+        }
+      },
+      "ma_conduta": {
+        "gravidade": "media",
+        "artigos": ["Art. 5º, I", "Art. 6º, II"],
+        "descricao": "Conduta inadequada ou propaganda irregular",
+        "penalidades": ["Advertência confidencial", "Censura confidencial"],
+        "criterios_gravidade": {
+          "leve": "Propaganda irregular",
+          "media": "Conduta inadequada reiterada"
+        }
+      },
+      "fraude": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 6º, IV", "Art. 6º, V"],
+        "descricao": "Falsificação de documentos ou fraude em procedimentos",
+        "penalidades": ["Suspensão", "Cassação"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer tipo de fraude"
+        }
+      }
+    }
+  },
+  "CREF": {
+    "nome_completo": "Conselho Regional de Educação Física",
+    "codigo_etica": "Resolução CONFEF nº 307/2015",
+    "infrações": {
+      "negligencia": {
+        "gravidade": "grave",
+        "artigos": ["Art. 3º, I", "Art. 4º, II"],
+        "descricao": "Negligência na prescrição de exercícios ou supervisão inadequada",
+        "penalidades": ["Advertência", "Multa", "Suspensão", "Cancelamento do registro"],
+        "criterios_gravidade": {
+          "media": "Negligência sem lesão grave",
+          "grave": "Negligência com lesão ou dano à saúde"
+        }
+      },
+      "assedio": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 4º, IV"],
+        "descricao": "Assédio moral ou sexual contra aluno ou colega",
+        "penalidades": ["Suspensão", "Cancelamento do registro"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer forma de assédio"
+        }
+      },
+      "ma_conduta": {
+        "gravidade": "media",
+        "artigos": ["Art. 3º, III", "Art. 4º, I"],
+        "descricao": "Conduta inadequada ou exercício irregular da profissão",
+        "penalidades": ["Advertência", "Multa"],
+        "criterios_gravidade": {
+          "leve": "Conduta inadequada isolada",
+          "media": "Exercício irregular ou conduta reiterada"
+        }
+      },
+      "fraude": {
+        "gravidade": "gravissima",
+        "artigos": ["Art. 4º, III", "Art. 4º, V"],
+        "descricao": "Falsificação de documentos ou uso indevido de título",
+        "penalidades": ["Suspensão", "Cancelamento do registro"],
+        "criterios_gravidade": {
+          "gravissima": "Qualquer tipo de fraude"
+        }
+      }
+    }
+  }
+}

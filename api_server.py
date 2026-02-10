@@ -714,33 +714,84 @@ def get_analytics():
             'averageResolutionTime': '0h'
         }), 500
 
-@app.route('/api/latest-analysis', methods=['GET'])
-def get_latest_analysis():
-    """Retorna a análise mais recente de denúncia"""
+
+# =====================================================================
+# Sync Endpoints — Sincronização Desktop ↔ Server
+# =====================================================================
+
+@app.route('/api/sync/pull', methods=['GET'])
+def sync_pull():
+    """Retorna todas as denúncias para o desktop sincronizar."""
     try:
         complaints = evichain.get_all_complaints()
-        
-        if not complaints:
-            return jsonify({
-                'success': False,
-                'error': 'Nenhuma denúncia encontrada'
-            }), 404
-        
-        # Pega a denúncia mais recente com análise de IA
-        latest_complaint = None
-        for complaint in reversed(complaints):
-            if complaint.get('ia_analysis'):
-                latest_complaint = complaint
-                break
-        
-        if not latest_complaint:
-            return jsonify({
-                'success': False,
-                'error': 'Nenhuma análise de IA encontrada'
-            }), 404
-        
         return jsonify({
             'success': True,
+            'complaints': complaints,
+            'total': len(complaints),
+            'server_time': time.time()
+        })
+    except Exception as e:
+        print(f"[SYNC] Erro no pull: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sync/push', methods=['POST'])
+def sync_push():
+    """Recebe uma denúncia do desktop e registra no servidor."""
+    try:
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({'success': False, 'error': 'JSON inválido'}), 400
+
+        complaint_id = data.get('id', '')
+
+        # Verificar se já existe no servidor
+        existing = evichain.get_all_complaints()
+        existing_ids = {c.get('id') for c in existing}
+
+        if complaint_id in existing_ids:
+            return jsonify({
+                'success': True,
+                'status': 'already_exists',
+                'complaint_id': complaint_id
+            }), 200
+
+        # Registrar nova denúncia vinda do desktop
+        transaction_data = {
+            'titulo': data.get('titulo', 'Denúncia sem Título'),
+            'nomeDenunciado': data.get('nomeDenunciado', ''),
+            'descricao': data.get('descricao', ''),
+            'conselho': data.get('conselho', 'N/A'),
+            'categoria': data.get('categoria', 'N/A'),
+            'anonymous': data.get('anonymous', True),
+            'ouvidoriaAnonima': data.get('ouvidoriaAnonima', False),
+            'assunto': data.get('assunto', ''),
+            'prioridade': data.get('prioridade', ''),
+            'finalidade': data.get('finalidade', ''),
+            'codigosAnteriores': data.get('codigosAnteriores', ''),
+            'file_hashes': [],
+            'ia_analysis': data.get('ia_analysis') or {},
+            'source': data.get('source', 'desktop')
+        }
+
+        # Usar o ID original do desktop se possível
+        new_id = evichain.add_evidence_transaction(transaction_data)
+        new_block = evichain.mine_pending_transactions()
+
+        print(f"[SYNC] Denúncia recebida do desktop: {complaint_id} → registrada como {new_id}")
+
+        return jsonify({
+            'success': True,
+            'status': 'created',
+            'complaint_id': new_id,
+            'original_id': complaint_id,
+            'block_index': new_block.index if new_block else None
+        }), 201
+
+    except Exception as e:
+        print(f"[SYNC] Erro no push: {e}")
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
             'complaint_id': latest_complaint.get('id', 'N/A'),
             'full_analysis': latest_complaint.get('ia_analysis', {})
         })
