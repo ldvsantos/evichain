@@ -152,6 +152,10 @@ def serve_index():
 def serve_landing():
     return send_from_directory(str(get_web_root()), "landing.html")
 
+@app.route("/nova-denuncia.html")
+def serve_nova_denuncia():
+    return send_from_directory(str(get_web_root()), "nova-denuncia.html")
+
 @app.route("/dashboard.html")
 def serve_dashboard():
     return send_from_directory(str(get_web_root()), "dashboard.html")

@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('/api/submit-complaint', {
+            const response = await fetch('api/submit-complaint', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -152,7 +152,7 @@ if (btnAnalisarTexto) {
         
         try {
             // Chamar API do assistente no backend
-            const response = await fetch('http://localhost:5000/api/assistente/analisar', {
+            const response = await fetch('api/assistente/analisar', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -15,12 +15,12 @@ async function loadDashboardData() {
     try {
         // Carregamento em paralelo de todas as informações
         const [complaintsResponse, analyticsResponse] = await Promise.all([
-            fetch('/api/complaints'),
-            fetch('/api/analytics')
+            fetch('api/complaints'),
+            fetch('api/analytics')
         ]);
         
         if (!complaintsResponse.ok || !analyticsResponse.ok) {
-            throw new Error('Erro ao carregar dados do servidor');
+            throw new Error('Servidor indisponível. No GitHub Pages, o backend não está ativo.');
         }
         
         const complaintsResult = await complaintsResponse.json();
@@ -148,7 +148,19 @@ function showLoading(show) {
 
 function showError(message) {
     console.error(message);
-    alert(message);
+    // Exibir mensagem amigável no dashboard em vez de alert
+    const container = document.querySelector('.dashboard-content') || document.querySelector('main') || document.body;
+    const existingBanner = document.getElementById('errorBanner');
+    if (existingBanner) existingBanner.remove();
+    const banner = document.createElement('div');
+    banner.id = 'errorBanner';
+    banner.style.cssText = 'background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:20px;border-radius:12px;margin:20px auto;max-width:800px;text-align:center;font-family:Inter,sans-serif;';
+    banner.innerHTML = `
+        <p style="font-size:1.1rem;font-weight:600;margin-bottom:8px;"><i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i> Dados indisponíveis</p>
+        <p style="margin-bottom:12px;">O servidor backend não está acessível neste ambiente. Para visualizar dados reais, acesse via <a href="http://3.15.2.17/" target="_blank" style="color:#2563eb;text-decoration:underline;">servidor EC2</a>.</p>
+        <button onclick="this.parentElement.remove()" style="background:#dc2626;color:white;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;">Fechar</button>
+    `;
+    container.prepend(banner);
 }
 
 // Funções dos botões
@@ -157,15 +169,15 @@ function refreshData() {
 }
 
 function exportReport() {
-    window.open('/api/export-blockchain', '_blank');
+    window.open('api/export-blockchain', '_blank');
 }
 
 function goBack() {
-    window.location.href = '/';
+    window.location.href = 'index.html';
 }
 
 function openInvestigationPage() {
-    window.location.href = '/investigador.html';
+    window.location.href = 'investigador.html';
 }
 
 function viewComplaintDetails(complaintId) {
@@ -405,7 +417,7 @@ async function loadLatestComplaintAnalysis() {
     if (!analysisContainer) return;
 
     try {
-        const response = await fetch('/api/latest-analysis');
+        const response = await fetch('api/latest-analysis');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -556,7 +568,7 @@ function exportPDFViaBackend() {
         showSuccessMessage('Gerando PDF no servidor...');
         
         // Fazer requisição para o backend
-        fetch('/api/generate_pdf', {
+        fetch('api/generate_pdf', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

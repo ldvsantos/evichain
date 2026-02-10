@@ -28,8 +28,8 @@ function initMobileNav() {
 async function loadSystemStats() {
     try {
         const [healthRes, complaintsRes] = await Promise.all([
-            fetch('/api/health'),
-            fetch('/api/complaints')
+            fetch('api/health'),
+            fetch('api/complaints')
         ]);
 
         if (healthRes.ok) {
@@ -55,7 +55,7 @@ async function loadRecentActivity() {
     if (!list) return;
 
     try {
-        const res = await fetch('/api/complaints');
+        const res = await fetch('api/complaints');
         if (!res.ok) throw new Error('Falha ao buscar denúncias');
         const data = await res.json();
 
