@@ -2,6 +2,12 @@
 // EviChain - script.js (Versão Final Definitiva)
 // =====================================================================
 
+// Detecta o base URL da API
+function getScriptApiBase() {
+    if (window.location.hostname.includes('github.io')) return null;
+    return window.location.origin;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     console.log('EviChain - Página principal carregada.');
 
@@ -67,7 +73,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
-            const response = await fetch('api/submit-complaint', {
+            const apiBase = getScriptApiBase();
+            if (!apiBase) {
+                showMessage(formMessage, 'error', 'Envio de denúncias disponível apenas com o servidor ativo (EC2). Este ambiente é apenas demonstração.');
+                resetButton(submitButton);
+                return;
+            }
+            const response = await fetch(apiBase + '/api/submit-complaint', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -152,7 +164,13 @@ if (btnAnalisarTexto) {
         
         try {
             // Chamar API do assistente no backend
-            const response = await fetch('api/assistente/analisar', {
+            const apiBase = getScriptApiBase();
+            if (!apiBase) {
+                areaSugestoes.style.display = 'block';
+                conteudoSugestoes.innerHTML = '<p style="color:#b45309;"><i class="fas fa-info-circle"></i> Assistente de IA disponível apenas com o servidor ativo.</p>';
+                return;
+            }
+            const response = await fetch(apiBase + '/api/assistente/analisar', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

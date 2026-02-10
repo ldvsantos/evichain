@@ -2,6 +2,12 @@
 // EviChain — Página Inicial do Sistema (home.js)
 // =====================================================
 
+// Detecta o base URL da API
+function getApiBase() {
+    if (window.location.hostname.includes('github.io')) return null;
+    return window.location.origin;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     initMobileNav();
     loadSystemStats();
@@ -26,10 +32,19 @@ function initMobileNav() {
 
 // ── System Stats (top banner) ────────────────────────
 async function loadSystemStats() {
+    const apiBase = getApiBase();
+    if (!apiBase) {
+        // Modo offline: mostrar dados demo
+        const blocksEl = document.getElementById('statBlocks');
+        const complaintsEl = document.getElementById('statComplaints');
+        if (blocksEl) blocksEl.textContent = '12';
+        if (complaintsEl) complaintsEl.textContent = '5';
+        return;
+    }
     try {
         const [healthRes, complaintsRes] = await Promise.all([
-            fetch('api/health'),
-            fetch('api/complaints')
+            fetch(apiBase + '/api/health'),
+            fetch(apiBase + '/api/complaints')
         ]);
 
         if (healthRes.ok) {
@@ -54,8 +69,33 @@ async function loadRecentActivity() {
     const list = document.getElementById('activityList');
     if (!list) return;
 
+    const apiBase = getApiBase();
+
+    // Demo data para modo offline
+    if (!apiBase) {
+        const demoItems = [
+            { titulo: 'Exercício ilegal de profissão', categoria: 'Exercício Ilegal', ia_analysis: { analise_juridica: { gravidade: 'Alta' } } },
+            { titulo: 'Negligência em atendimento', categoria: 'Negligência', ia_analysis: { analise_juridica: { gravidade: 'Média' } } },
+            { titulo: 'Assédio em ambiente profissional', categoria: 'Assédio', ia_analysis: { analise_juridica: { gravidade: 'Urgente' } } },
+        ];
+        list.innerHTML = demoItems.map(function (c) {
+            return `
+                <div class="sys-activity-item">
+                    <div class="sys-activity-badge ${getBadgeClass(c)}">
+                        <i class="fas ${getBadgeIcon(c)}"></i>
+                    </div>
+                    <div class="sys-activity-text">
+                        <strong>${escapeHtml(c.titulo)}</strong>
+                        <p>${escapeHtml(c.categoria)}</p>
+                    </div>
+                    <span class="sys-activity-time">demo</span>
+                </div>`;
+        }).join('');
+        return;
+    }
+
     try {
-        const res = await fetch('api/complaints');
+        const res = await fetch(apiBase + '/api/complaints');
         if (!res.ok) throw new Error('Falha ao buscar denúncias');
         const data = await res.json();
 

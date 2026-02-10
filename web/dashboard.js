@@ -2,6 +2,61 @@
 let complaintsData = [];
 let analyticsData = {};
 let currentComplaint = null; // Armazena a denúncia atualmente aberta no modal
+let isOfflineMode = false; // Indica se estamos usando dados demo
+
+// ── Dados Demo (fallback quando API indisponível) ────────────
+const DEMO_COMPLAINTS = [
+    {
+        id: 'DEMO-001', titulo: 'Exercício ilegal de profissão', categoria: 'Exercício Ilegal',
+        descricao: 'Profissional atuando sem registro no conselho competente.',
+        timestamp: Date.now() / 1000 - 86400, data: Date.now() / 1000 - 86400,
+        status: 'pending', conselho: 'CREF20',
+        ia_analysis: { analise_juridica: { gravidade: 'Alta' } }
+    },
+    {
+        id: 'DEMO-002', titulo: 'Negligência em atendimento', categoria: 'Negligência',
+        descricao: 'Profissional negligenciou procedimentos obrigatórios.',
+        timestamp: Date.now() / 1000 - 172800, data: Date.now() / 1000 - 172800,
+        status: 'pending', conselho: 'CONFEF',
+        ia_analysis: { analise_juridica: { gravidade: 'Média' } }
+    },
+    {
+        id: 'DEMO-003', titulo: 'Assédio em ambiente profissional', categoria: 'Assédio',
+        descricao: 'Relato de conduta inadequada durante sessão de treinamento.',
+        timestamp: Date.now() / 1000 - 259200, data: Date.now() / 1000 - 259200,
+        status: 'resolved', conselho: 'CREF20',
+        ia_analysis: { analise_juridica: { gravidade: 'Urgente' } }
+    },
+    {
+        id: 'DEMO-004', titulo: 'Fraude em documentação de estágio', categoria: 'Fraude em Estágio',
+        descricao: 'Documentos de estágio supervisionado com informações falsas.',
+        timestamp: Date.now() / 1000 - 345600, data: Date.now() / 1000 - 345600,
+        status: 'pending', conselho: 'CREF20',
+        ia_analysis: { analise_juridica: { gravidade: 'Alta' } }
+    },
+    {
+        id: 'DEMO-005', titulo: 'Irregularidade em registro profissional', categoria: 'Outras',
+        descricao: 'Possível irregularidade na emissão de registro profissional.',
+        timestamp: Date.now() / 1000 - 432000, data: Date.now() / 1000 - 432000,
+        status: 'resolved', conselho: 'CONFEF',
+        ia_analysis: { analise_juridica: { gravidade: 'Baixa' } }
+    }
+];
+
+const DEMO_ANALYTICS = {
+    totalComplaints: 5,
+    pendingComplaints: 3,
+    resolvedComplaints: 2,
+    averageResolutionTime: '24h'
+};
+
+// Detecta o base URL da API
+function getApiBase() {
+    // Se estamos em GitHub Pages, não tem backend
+    if (window.location.hostname.includes('github.io')) return null;
+    // Caso contrário, usar origin (funciona em EC2, localhost, etc.)
+    return window.location.origin;
+}
 
 // Inicialização do dashboard
 document.addEventListener('DOMContentLoaded', function() {
@@ -11,38 +66,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadDashboardData() {
     showLoading(true);
+    const apiBase = getApiBase();
     
     try {
-        // Carregamento em paralelo de todas as informações
+        if (!apiBase) throw new Error('offline');
+
         const [complaintsResponse, analyticsResponse] = await Promise.all([
-            fetch('api/complaints'),
-            fetch('api/analytics')
+            fetch(apiBase + '/api/complaints'),
+            fetch(apiBase + '/api/analytics')
         ]);
         
         if (!complaintsResponse.ok || !analyticsResponse.ok) {
-            throw new Error('Servidor indisponível. No GitHub Pages, o backend não está ativo.');
+            throw new Error('Servidor retornou erro (HTTP ' + complaintsResponse.status + ')');
         }
         
         const complaintsResult = await complaintsResponse.json();
         analyticsData = await analyticsResponse.json();
         
-        // Extrai o array de denúncias da resposta
         if (complaintsResult.success && complaintsResult.complaints) {
             complaintsData = complaintsResult.complaints;
         } else {
             complaintsData = [];
         }
-        
-        // Atualiza todas as seções
-        updateComplaintsTable();
-        updateAnalytics();
-        updateRecentTransactions();
+
+        isOfflineMode = false;
         
     } catch (error) {
-        showError('Erro ao carregar dados: ' + error.message);
-    } finally {
-        showLoading(false);
+        console.warn('API indisponível, usando dados demo:', error.message);
+        isOfflineMode = true;
+        complaintsData = DEMO_COMPLAINTS;
+        analyticsData = DEMO_ANALYTICS;
+        showOfflineBanner();
     }
+
+    // Atualiza todas as seções (com dados reais ou demo)
+    updateComplaintsTable();
+    updateAnalytics();
+    updateRecentTransactions();
+    showLoading(false);
 }
 
 // Atualiza a tabela de denúncias
@@ -148,17 +209,18 @@ function showLoading(show) {
 
 function showError(message) {
     console.error(message);
-    // Exibir mensagem amigável no dashboard em vez de alert
+}
+
+function showOfflineBanner() {
     const container = document.querySelector('.dashboard-content') || document.querySelector('main') || document.body;
-    const existingBanner = document.getElementById('errorBanner');
-    if (existingBanner) existingBanner.remove();
+    const existingBanner = document.getElementById('offlineBanner');
+    if (existingBanner) return; // já existe
     const banner = document.createElement('div');
-    banner.id = 'errorBanner';
-    banner.style.cssText = 'background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:20px;border-radius:12px;margin:20px auto;max-width:800px;text-align:center;font-family:Inter,sans-serif;';
+    banner.id = 'offlineBanner';
+    banner.style.cssText = 'background:#eff6ff;border:1px solid #93c5fd;color:#1e40af;padding:16px 20px;border-radius:12px;margin:16px auto;max-width:900px;text-align:center;font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;';
     banner.innerHTML = `
-        <p style="font-size:1.1rem;font-weight:600;margin-bottom:8px;"><i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i> Dados indisponíveis</p>
-        <p style="margin-bottom:12px;">O servidor backend não está acessível neste ambiente. Para visualizar dados reais, acesse via <a href="http://3.15.2.17/" target="_blank" style="color:#2563eb;text-decoration:underline;">servidor EC2</a>.</p>
-        <button onclick="this.parentElement.remove()" style="background:#dc2626;color:white;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;">Fechar</button>
+        <span><i class="fas fa-info-circle"></i> <strong>Modo demonstração</strong> — Exibindo dados de exemplo. Para dados reais, acesse via <a href="http://3.15.2.17/" target="_blank" style="color:#2563eb;text-decoration:underline;">servidor EC2</a>.</span>
+        <button onclick="location.reload()" style="background:#2563eb;color:white;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:.85rem;"><i class="fas fa-sync-alt"></i> Reconectar</button>
     `;
     container.prepend(banner);
 }
@@ -169,7 +231,9 @@ function refreshData() {
 }
 
 function exportReport() {
-    window.open('api/export-blockchain', '_blank');
+    const apiBase = getApiBase();
+    if (!apiBase) { alert('Exportação disponível apenas com o servidor ativo.'); return; }
+    window.open(apiBase + '/api/export-blockchain', '_blank');
 }
 
 function goBack() {
@@ -417,7 +481,9 @@ async function loadLatestComplaintAnalysis() {
     if (!analysisContainer) return;
 
     try {
-        const response = await fetch('api/latest-analysis');
+        const apiBase = getApiBase();
+        if (!apiBase) { analysisContainer.innerHTML = '<p>Análise disponível apenas com o servidor ativo.</p>'; return; }
+        const response = await fetch(apiBase + '/api/latest-analysis');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -567,8 +633,10 @@ function exportPDFViaBackend() {
         
         showSuccessMessage('Gerando PDF no servidor...');
         
+        const apiBase = getApiBase();
+        if (!apiBase) { showSuccessMessage('Geração de PDF disponível apenas com o servidor ativo.'); return; }
         // Fazer requisição para o backend
-        fetch('api/generate_pdf', {
+        fetch(apiBase + '/api/generate_pdf', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
