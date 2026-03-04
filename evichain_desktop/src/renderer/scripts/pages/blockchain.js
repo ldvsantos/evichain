@@ -9,7 +9,7 @@ Router.register('blockchain', async (container) => {
         const info = await window.evichainAPI.blockchain.info();
 
         container.innerHTML = `
-            ${Components.pageHeader('Blockchain', 'Visualização da cadeia de evidências imutável')}
+            ${Components.pageHeader('Blockchain', 'Visualização da cadeia de evidências (tamper-evident)')}
 
             <div class="stats-grid">
                 ${Components.statCard({ label: 'Total de Blocos', value: info.totalBlocks || 0, icon: '🔗', color: 'var(--primary)' })}

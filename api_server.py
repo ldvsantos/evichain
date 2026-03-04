@@ -14,10 +14,12 @@ import uuid
 from datetime import datetime
 from collections import deque
 from pathlib import Path
+from typing import Dict
 import traceback
 
 from blockchain_simulator import generate_complaint_id
 from evichain import Services, create_services, load_settings
+from evichain.threat_model import get_threat_catalogue, get_security_posture, get_threat_summary
 
 
 app = Flask(__name__)
@@ -139,10 +141,63 @@ def _parse_loose_object(raw: str):
     return result
 @app.after_request
 def after_request(response):
+    # CORS headers
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+
+    # Security headers (OWASP best practices — addresses reviewer T-06)
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Permissions-Policy'] = 'geolocation=(), camera=(), microphone=()'
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "font-src 'self'; "
+        "connect-src 'self'"
+    )
+
     return response
+
+
+# ── Rate Limiter (in-memory, per-IP) ─────────────────────────────
+# Addresses STRIDE threat T-08 (Denial of Service)
+_rate_limit_store: Dict[str, list] = {}
+RATE_LIMIT_WINDOW = 60     # seconds
+RATE_LIMIT_MAX_REQUESTS = 30  # max requests per window per IP
+
+
+@app.before_request
+def rate_limit():
+    """Simple sliding-window rate limiter — no external dependency."""
+    # Skip rate limiting for static files
+    if request.path.startswith('/web/') or request.path in ('/', '/landing.css', '/landing.js', '/icon.svg'):
+        return None
+
+    client_ip = request.remote_addr or '0.0.0.0'
+    now = time.time()
+    window_start = now - RATE_LIMIT_WINDOW
+
+    # Clean up old entries
+    if client_ip in _rate_limit_store:
+        _rate_limit_store[client_ip] = [
+            ts for ts in _rate_limit_store[client_ip] if ts > window_start
+        ]
+    else:
+        _rate_limit_store[client_ip] = []
+
+    if len(_rate_limit_store[client_ip]) >= RATE_LIMIT_MAX_REQUESTS:
+        return jsonify({
+            "success": False,
+            "error": "Rate limit exceeded. Try again later."
+        }), 429
+
+    _rate_limit_store[client_ip].append(now)
+    return None
 
 @app.route("/")
 def serve_landing():
@@ -709,6 +764,43 @@ def get_stats():
             'success': False,
             'error': str(e)
         }), 500
+
+
+# ── Security & Threat Model Endpoints ───────────────────────────
+# Provides transparency about system security posture (for the article
+# and for auditors).  Addresses reviewer criticism about lack of threat model.
+
+@app.route('/api/security/threat-model', methods=['GET'])
+def api_threat_model():
+    """Returns the full STRIDE threat catalogue."""
+    return jsonify({
+        'success': True,
+        'threats': get_threat_catalogue(),
+        'summary': get_threat_summary(),
+    })
+
+
+@app.route('/api/security/posture', methods=['GET'])
+def api_security_posture():
+    """Returns explicit guarantees and non-guarantees."""
+    return jsonify({
+        'success': True,
+        'posture': get_security_posture(),
+    })
+
+
+@app.route('/api/security/summary', methods=['GET'])
+def api_security_summary():
+    """Returns a high-level summary of the threat model."""
+    summary = get_threat_summary()
+    posture = get_security_posture()
+    return jsonify({
+        'success': True,
+        'summary': summary,
+        'guarantees_count': len(posture['guarantees']),
+        'non_guarantees_count': len(posture['non_guarantees']),
+    })
+
 
 @app.route('/api/analytics', methods=['GET'])
 def get_analytics():
