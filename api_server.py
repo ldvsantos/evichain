@@ -1410,8 +1410,8 @@ def generate_pdf():
             ['Blockchain para Evidências Digitais', ''],
             ['', ''],
             [f'Data/Hora de Geração: {datetime.now().strftime("%d/%m/%Y às %H:%M:%S")}', ''],
-            ['Este documento possui validade jurídica conforme', ''],
-            ['Lei 14.063/2020 (Marco Legal das Assinaturas Eletrônicas)', '']
+            ['Este documento foi gerado automaticamente e não possui', ''],
+            ['assinatura digital. Consulte o sistema EviChain para verificação.', '']
         ]
         
         footer_table = Table(footer_data, colWidths=[15*cm, 0*cm])

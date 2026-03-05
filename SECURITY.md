@@ -193,8 +193,9 @@ Do not open public issues for security-sensitive matters.
 
 - **LGPD (Lei 13.709/2018):** Anonymous complaints do not store PII of the
   complainant. Professional names are public registry data.
-- **Marco Legal das Assinaturas Eletrônicas (Lei 14.063/2020):** Hash-chain
-  provides electronic signature equivalent for evidence timestamping.
+- **Marco Legal das Assinaturas Eletrônicas (Lei 14.063/2020):** O hash-chain
+  fornece tamper-evidence (detecção de adulteração) para timestamping de
+  evidências, mas não constitui assinatura eletrônica nos termos da Lei.
 - **OWASP Top 10 (2021):** Addressed items: A01 (Broken Access Control — rate
   limiting), A03 (Injection — no SQL/eval), A05 (Security Misconfiguration —
   security headers), A09 (Security Logging — trace IDs).

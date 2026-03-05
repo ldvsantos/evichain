@@ -77,7 +77,8 @@ class EviChainBlockchain:
             self._create_genesis_block()
 
     def _create_block_from_dict(self, data: Dict) -> Block:
-        """Cria um objeto Block a partir de um dicionário"""
+        """Cria um objeto Block a partir de um dicionário, preservando o hash salvo
+        para que is_chain_valid() possa detectar adulterações."""
         block = Block(
             index=data['index'],
             timestamp=data['timestamp'],
@@ -85,8 +86,14 @@ class EviChainBlockchain:
             previous_hash=data['previous_hash']
         )
         block.nonce = data['nonce']
-        # Recalcula o hash para garantir que está correto com a lógica atual
-        block.hash = block.calculate_hash() 
+        # Preserva o hash original salvo em vez de recalcular.
+        # Isso garante que is_chain_valid() detecte adulterações ao comparar
+        # o hash salvo com o hash recalculado dos campos do bloco.
+        saved_hash = data.get('hash', '')
+        recalculated_hash = block.calculate_hash()
+        if saved_hash and saved_hash != recalculated_hash:
+            print(f"⚠️ Alerta de integridade: hash do bloco {data['index']} diverge do esperado!")
+        block.hash = saved_hash if saved_hash else recalculated_hash
         return block
 
     def _create_genesis_block(self):

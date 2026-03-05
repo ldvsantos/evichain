@@ -193,7 +193,14 @@ class EviChainDB {
     validateChain() {
         const blocks = this.db.prepare('SELECT * FROM blockchain ORDER BY block_index ASC').all();
         for (let i = 1; i < blocks.length; i++) {
+            // Verifica vinculação da cadeia
             if (blocks[i].previous_hash !== blocks[i - 1].hash) return false;
+            // Verifica integridade do conteúdo (recomputação de hash)
+            const recalculated = this._calculateHash(
+                blocks[i].block_index, blocks[i].timestamp,
+                blocks[i].data, blocks[i].previous_hash, blocks[i].nonce
+            );
+            if (blocks[i].hash !== recalculated) return false;
         }
         return true;
     }

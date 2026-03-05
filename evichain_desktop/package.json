@@ -1,6 +1,6 @@
 {
   "name": "evichain-desktop",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "EviChain Desktop — Plataforma de Inovação Probatória com Blockchain e IA",
   "main": "src/main/main.js",
   "author": "EviChain Team",
