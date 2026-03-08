@@ -23,12 +23,13 @@ import pytest
 # Allow imports from project root
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from api_server import app  # noqa: E402
+from api_server import app, _rate_limit_store  # noqa: E402
 
 
 @pytest.fixture()
 def client():
     app.config["TESTING"] = True
+    _rate_limit_store.clear()
     with app.test_client() as c:
         yield c
 
@@ -184,8 +185,9 @@ class TestThreatModelEndpoints:
         r = client.get("/api/security/posture")
         assert r.status_code == 200
         data = r.get_json()
-        assert "guarantees" in data
-        assert "non_guarantees" in data
+        posture = data.get("posture", data)
+        assert "guarantees" in posture
+        assert "non_guarantees" in posture
 
     def test_summary_accessible(self, client):
         r = client.get("/api/security/summary")
