@@ -20,10 +20,14 @@ import traceback
 from blockchain_simulator import generate_complaint_id
 from evichain import Services, create_services, load_settings
 from evichain.threat_model import get_threat_catalogue, get_security_posture, get_threat_summary
+from evichain.audit_log import AuditLog
+from evichain.external_anchor import ExternalAnchor
 
 
 app = Flask(__name__)
 TRACE_BUFFER = deque(maxlen=120)
+audit_log: AuditLog | None = None
+external_anchor: ExternalAnchor | None = None
 
 
 SERVICES: Services | None = None
@@ -40,6 +44,7 @@ def init_app() -> None:
     """Inicializa settings + services e injeta em variáveis globais (compat)."""
 
     global SERVICES, assistente, investigador, consultor_registros, evichain, ia_engine
+    global audit_log, external_anchor
 
     settings = load_settings(project_root=Path(__file__).resolve().parent)
     app.config["EVICHAIN_PROJECT_ROOT"] = str(settings.project_root)
@@ -55,6 +60,10 @@ def init_app() -> None:
     consultor_registros = SERVICES.consultor_registros
     evichain = SERVICES.blockchain
     ia_engine = SERVICES.ia_engine
+
+    # Audit log and external anchoring
+    audit_log = AuditLog()
+    external_anchor = ExternalAnchor(evichain)
 
 
 def get_project_root() -> Path:
@@ -316,12 +325,22 @@ def submit_complaint():
         complaint_id = evichain.add_evidence_transaction(transaction_data)
         
         log_trace(trace_id, 'mining_start')
+        t_mine_start = time.monotonic()
         new_block = evichain.mine_pending_transactions()
+        mining_ms = (time.monotonic() - t_mine_start) * 1000
+
+        # Audit log + cycle timing
+        cycle_ms = (time.monotonic() - t_mine_start) * 1000 + mining_ms
+        if audit_log:
+            audit_log.log_complaint_submitted(complaint_id, actor=trace_id)
+            if new_block:
+                audit_log.log_block_mined(new_block.index, new_block.hash)
 
         response = {
             'success': True,
             'complaint_id': complaint_id,
             'block_index': new_block.index if new_block else None,
+            'mining_time_ms': round(mining_ms, 2),
         }
         return jsonify(response), 200
 
@@ -800,6 +819,35 @@ def api_security_summary():
         'guarantees_count': len(posture['guarantees']),
         'non_guarantees_count': len(posture['non_guarantees']),
     })
+
+
+# ------------------------------------------------------------------
+# External Anchoring & Audit endpoints
+# ------------------------------------------------------------------
+
+@app.route('/api/security/anchor', methods=['POST'])
+def api_anchor_chain():
+    """Anchor the current chain root hash via RFC 3161 timestamping."""
+    try:
+        receipt = external_anchor.anchor_rfc3161()
+        if audit_log:
+            audit_log.log_anchor_created("rfc3161", receipt["root_hash"])
+        return jsonify({"success": True, "receipt": receipt})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route('/api/security/anchors', methods=['GET'])
+def api_list_anchors():
+    """List all stored anchor receipts."""
+    return jsonify({"success": True, "anchors": external_anchor.list_anchors()})
+
+
+@app.route('/api/security/audit-log/verify', methods=['GET'])
+def api_verify_audit_log():
+    """Verify the HMAC-chained integrity of the audit log."""
+    result = audit_log.verify_integrity() if audit_log else {"valid": True, "entries": 0, "errors": []}
+    return jsonify({"success": True, "audit_log": result})
 
 
 @app.route('/api/analytics', methods=['GET'])

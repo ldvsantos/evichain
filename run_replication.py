@@ -18,15 +18,19 @@
 #     ├── benchmark_results.json       # API & mining benchmarks
 #     ├── evaluation_results.json      # Quality & integrity metrics
 #     ├── threat_model.json            # STRIDE catalogue export
-#     └── replication_summary.json     # Overall summary
+#     ├── dpia_report.json             # LGPD/GDPR compliance report
+#     ├── replication_summary.json     # Overall summary
+#     └── replication_package.zip      # Self-contained archive
 
 from __future__ import annotations
 
 import argparse
 import json
 import os
+import shutil
 import sys
 import time
+import zipfile
 from datetime import datetime
 from pathlib import Path
 
@@ -59,7 +63,7 @@ def run_replication(output_dir: str = "replication_results",
     print(f"{'='*60}\n")
 
     # ── Step 1: Export Threat Model ──
-    print("  [1/4] Exporting threat model...")
+    print("  [1/6] Exporting threat model...")
     try:
         from evichain.threat_model import (
             get_threat_catalogue, get_security_posture, get_threat_summary
@@ -79,7 +83,7 @@ def run_replication(output_dir: str = "replication_results",
         print(f"        Error: {e}")
 
     # ── Step 2: Mining Benchmark ──
-    print("  [2/4] Running mining benchmark...")
+    print("  [2/6] Running mining benchmark...")
     try:
         from benchmark import benchmark_mining, benchmark_chain_validation
 
@@ -107,7 +111,7 @@ def run_replication(output_dir: str = "replication_results",
         print(f"        Error: {e}")
 
     # ── Step 3: Evaluation Metrics ──
-    print("  [3/4] Running evaluation metrics...")
+    print("  [3/6] Running evaluation metrics...")
     try:
         from evaluation_metrics import run_full_evaluation
 
@@ -123,7 +127,7 @@ def run_replication(output_dir: str = "replication_results",
         print(f"        Error: {e}")
 
     # ── Step 4: System Info ──
-    print("  [4/4] Collecting system info...")
+    print("  [4/6] Collecting system info...")
     try:
         import platform
         system_info = {
@@ -150,7 +154,76 @@ def run_replication(output_dir: str = "replication_results",
     except Exception as e:
         summary["steps"]["system_info"] = {"status": "error", "error": str(e)}
 
+    # ── Step 5: LGPD/GDPR Compliance Report ──
+    print("  [5/6] Generating LGPD/GDPR compliance report...")
+    try:
+        from evichain.lgpd_compliance import LGPDComplianceMatrix
+        lgpd = LGPDComplianceMatrix()
+        dpia_path = os.path.join(output_dir, "dpia_report.json")
+        lgpd.generate_dpia_report(dpia_path, fmt="json")
+        summary["steps"]["lgpd_compliance"] = {
+            "status": "ok",
+            "file": dpia_path,
+            "compliance_summary": lgpd.compliance_summary(),
+        }
+        print(f"        Saved to {dpia_path}")
+    except Exception as e:
+        summary["steps"]["lgpd_compliance"] = {"status": "error", "error": str(e)}
+        print(f"        Error: {e}")
+
     # ── Save Summary ──
+    summary_path = os.path.join(output_dir, "replication_summary.json")
+    with open(summary_path, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2, ensure_ascii=False)
+
+    # ── Step 6: Build replication ZIP archive ──
+    print("  [6/6] Building replication ZIP archive...")
+    try:
+        zip_path = os.path.join(output_dir, "replication_package.zip")
+        project_root = Path(__file__).resolve().parent
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            # Include all result files
+            for fname in os.listdir(output_dir):
+                fpath = os.path.join(output_dir, fname)
+                if os.path.isfile(fpath) and fname != "replication_package.zip":
+                    zf.write(fpath, f"results/{fname}")
+            # Include key source files
+            source_files = [
+                "benchmark.py",
+                "evaluation_metrics.py",
+                "run_replication.py",
+                "requirements.txt",
+                "blockchain_simulator.py",
+                "evichain/threat_model.py",
+                "evichain/external_anchor.py",
+                "evichain/audit_log.py",
+                "evichain/lgpd_compliance.py",
+                "evichain/settings.py",
+                "evichain/services.py",
+                "load_benchmark.py",
+            ]
+            for sf in source_files:
+                sf_full = project_root / sf
+                if sf_full.exists():
+                    zf.write(str(sf_full), f"src/{sf}")
+            # Include test files
+            test_dir = project_root / "tests"
+            if test_dir.exists():
+                for tf in test_dir.rglob("*.py"):
+                    rel = tf.relative_to(project_root)
+                    zf.write(str(tf), f"src/{rel}")
+            # Include README
+            readme = project_root / "README.md"
+            if readme.exists():
+                zf.write(str(readme), "README.md")
+
+        summary["steps"]["zip_archive"] = {"status": "ok", "file": zip_path}
+        print(f"        Saved to {zip_path}")
+    except Exception as e:
+        summary["steps"]["zip_archive"] = {"status": "error", "error": str(e)}
+        print(f"        Error: {e}")
+
+    # Update summary with zip info and re-save
     summary_path = os.path.join(output_dir, "replication_summary.json")
     with open(summary_path, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
