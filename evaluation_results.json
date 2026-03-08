@@ -1,0 +1,79 @@
+{
+  "run_timestamp": "2026-03-08T16:25:08.560693",
+  "framework_version": "1.0.0",
+  "blockchain_integrity": {
+    "error": "Could not load blockchain: 'charmap' codec can't encode character '\\u274c' in position 0: character maps to <undefined>"
+  },
+  "complaint_quality": {
+    "n_complaints": 8,
+    "before": {
+      "label": "score_before",
+      "n": 8,
+      "mean": 15.9875,
+      "median": 18.45,
+      "stdev": 9.5649,
+      "min": 1.5,
+      "max": 25.8,
+      "q1": 12.9,
+      "q3": 24.3,
+      "iqr": 11.4,
+      "ci_95": {
+        "lower": 9.3594,
+        "upper": 22.6156
+      }
+    },
+    "after": {
+      "label": "score_after",
+      "n": 8,
+      "mean": 40.5,
+      "median": 35.0,
+      "stdev": 27.4591,
+      "min": 0,
+      "max": 88,
+      "q1": 30,
+      "q3": 66,
+      "iqr": 36,
+      "ci_95": {
+        "lower": 21.4718,
+        "upper": 59.5282
+      }
+    },
+    "improvement": {
+      "label": "improvement",
+      "n": 8,
+      "mean": 24.5125,
+      "median": 21.75,
+      "stdev": 25.9503,
+      "min": -2.6,
+      "max": 63.7,
+      "q1": 4.2,
+      "q3": 51.7,
+      "iqr": 47.5,
+      "ci_95": {
+        "lower": 6.5299,
+        "upper": 42.4951
+      }
+    },
+    "effect_size": {
+      "cohens_d": 1.1922,
+      "interpretation": "large",
+      "note": "Positive d indicates improvement after AI analysis"
+    },
+    "ai_source_distribution": {
+      "openai": 0,
+      "local": 8
+    }
+  },
+  "investigation_coverage": {
+    "supported_councils": [
+      "CRM",
+      "OAB",
+      "CREA",
+      "CRP",
+      "CRO",
+      "CREF"
+    ],
+    "total_councils_supported": 6,
+    "note": "Provide test_cases for live evaluation"
+  }
+}

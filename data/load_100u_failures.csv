@@ -1,0 +1,7 @@
+Method,Name,Error,Occurrences
+GET,/api/blockchain-info,HTTPError('429 Client Error: TOO MANY REQUESTS for url: /api/blockchain-info'),559
+GET,/api/stats,HTTPError('429 Client Error: TOO MANY REQUESTS for url: /api/stats'),395
+GET,/api/complaints,HTTPError('429 Client Error: TOO MANY REQUESTS for url: /api/complaints'),562
+GET,/api/health,HTTPError('429 Client Error: TOO MANY REQUESTS for url: /api/health'),754
+GET,/api/security/posture,HTTPError('429 Client Error: TOO MANY REQUESTS for url: /api/security/posture'),201
+GET,/api/security/threat-model,HTTPError('429 Client Error: TOO MANY REQUESTS for url: /api/security/threat-model'),204

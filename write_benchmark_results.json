@@ -1,0 +1,36 @@
+{
+  "write_endpoint": {
+    "samples": [
+      {
+        "total_ms": 1163.1077000056393,
+        "mining_ms": 1111.15,
+        "block": 77
+      },
+      {
+        "total_ms": 2638.1496000103652,
+        "mining_ms": 2610.76,
+        "block": 78
+      },
+      {
+        "total_ms": 446.76419999450445,
+        "mining_ms": 424.34,
+        "block": 79
+      },
+      {
+        "total_ms": 6375.07499998901,
+        "mining_ms": 6344.05,
+        "block": 80
+      },
+      {
+        "total_ms": 202.08679998177104,
+        "mining_ms": 164.16,
+        "block": 81
+      }
+    ],
+    "total_mean_ms": 2165.036659996258,
+    "total_median_ms": 1163.1077000056393,
+    "mining_mean_ms": 2130.8920000000003,
+    "mining_median_ms": 1111.15,
+    "overhead_mean_ms": 34.144659996258
+  }
+}

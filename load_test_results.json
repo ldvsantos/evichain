@@ -1,0 +1,143 @@
+{
+  "results": [
+    {
+      "category": "Read",
+      "workers": 10,
+      "total_requests": 80,
+      "ok_200": 29,
+      "rate_limited_429": 51,
+      "other_errors": 0,
+      "elapsed_s": 16.4,
+      "p95_ms": 2065.0,
+      "rps": 4.9,
+      "mean_ms": 2041.9,
+      "status_distribution": {
+        "200": 29,
+        "429": 51
+      }
+    },
+    {
+      "category": "Security",
+      "workers": 10,
+      "total_requests": 80,
+      "ok_200": 0,
+      "rate_limited_429": 80,
+      "other_errors": 0,
+      "elapsed_s": 16.4,
+      "p95_ms": 2064.0,
+      "rps": 4.9,
+      "mean_ms": 2043.1,
+      "status_distribution": {
+        "429": 80
+      }
+    },
+    {
+      "category": "Write",
+      "workers": 5,
+      "total_requests": 40,
+      "ok_200": 0,
+      "rate_limited_429": 40,
+      "other_errors": 0,
+      "elapsed_s": 16.4,
+      "p95_ms": 2067.0,
+      "rps": 2.4,
+      "mean_ms": 2043.0,
+      "status_distribution": {
+        "429": 40
+      }
+    },
+    {
+      "category": "Read",
+      "workers": 50,
+      "total_requests": 400,
+      "ok_200": 30,
+      "rate_limited_429": 370,
+      "other_errors": 0,
+      "elapsed_s": 16.4,
+      "p95_ms": 2069.0,
+      "rps": 24.4,
+      "mean_ms": 2043.1,
+      "status_distribution": {
+        "429": 370,
+        "200": 30
+      }
+    },
+    {
+      "category": "Security",
+      "workers": 50,
+      "total_requests": 400,
+      "ok_200": 0,
+      "rate_limited_429": 400,
+      "other_errors": 0,
+      "elapsed_s": 16.4,
+      "p95_ms": 2072.0,
+      "rps": 24.4,
+      "mean_ms": 2042.0,
+      "status_distribution": {
+        "429": 400
+      }
+    },
+    {
+      "category": "Write",
+      "workers": 5,
+      "total_requests": 40,
+      "ok_200": 0,
+      "rate_limited_429": 40,
+      "other_errors": 0,
+      "elapsed_s": 16.3,
+      "p95_ms": 2064.0,
+      "rps": 2.4,
+      "mean_ms": 2041.5,
+      "status_distribution": {
+        "429": 40
+      }
+    },
+    {
+      "category": "Read",
+      "workers": 100,
+      "total_requests": 800,
+      "ok_200": 30,
+      "rate_limited_429": 770,
+      "other_errors": 0,
+      "elapsed_s": 16.4,
+      "p95_ms": 2068.0,
+      "rps": 48.8,
+      "mean_ms": 2041.2,
+      "status_distribution": {
+        "429": 770,
+        "200": 30
+      }
+    },
+    {
+      "category": "Security",
+      "workers": 100,
+      "total_requests": 800,
+      "ok_200": 0,
+      "rate_limited_429": 800,
+      "other_errors": 0,
+      "elapsed_s": 16.5,
+      "p95_ms": 2070.0,
+      "rps": 48.6,
+      "mean_ms": 2045.0,
+      "status_distribution": {
+        "429": 800
+      }
+    },
+    {
+      "category": "Write",
+      "workers": 5,
+      "total_requests": 40,
+      "ok_200": 0,
+      "rate_limited_429": 40,
+      "other_errors": 0,
+      "elapsed_s": 16.4,
+      "p95_ms": 2069.0,
+      "rps": 2.4,
+      "mean_ms": 2044.5,
+      "status_distribution": {
+        "429": 40
+      }
+    }
+  ],
+  "timestamp": "2026-03-08T16:03:54"
+}

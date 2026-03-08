@@ -1,0 +1,151 @@
+{
+  "run_timestamp": "2026-03-08T15:56:11.065109",
+  "http_benchmark": {
+    "host": "http://localhost:5000",
+    "total_requests": 350,
+    "concurrency": 10,
+    "duration_seconds": 196.63,
+    "requests_per_second": 1.78,
+    "endpoints": [
+      {
+        "endpoint": "GET /api/health",
+        "method": "GET",
+        "total_requests": 50,
+        "successful": 30,
+        "failed": 20,
+        "success_rate_pct": 60.0,
+        "latency_ms": {
+          "mean": 2052.99,
+          "median": 2041.27,
+          "stdev": 47.57,
+          "min": 2018.96,
+          "max": 2179.45,
+          "p95": 2177.68,
+          "p99": 2179.2,
+          "ci_95_lower": 2039.81,
+          "ci_95_upper": 2066.18
+        }
+      },
+      {
+        "endpoint": "GET /api/blockchain-info",
+        "method": "GET",
+        "total_requests": 50,
+        "successful": 0,
+        "failed": 50,
+        "success_rate_pct": 0.0,
+        "latency_ms": {
+          "mean": 2039.42,
+          "median": 2039.9,
+          "stdev": 9.4,
+          "min": 2025.6,
+          "max": 2065.55,
+          "p95": 2052.0,
+          "p99": 2062.23,
+          "ci_95_lower": 2036.82,
+          "ci_95_upper": 2042.03
+        }
+      },
+      {
+        "endpoint": "GET /api/complaints",
+        "method": "GET",
+        "total_requests": 50,
+        "successful": 0,
+        "failed": 50,
+        "success_rate_pct": 0.0,
+        "latency_ms": {
+          "mean": 2044.11,
+          "median": 2044.77,
+          "stdev": 14.83,
+          "min": 2015.68,
+          "max": 2077.81,
+          "p95": 2067.08,
+          "p99": 2077.69,
+          "ci_95_lower": 2040.0,
+          "ci_95_upper": 2048.22
+        }
+      },
+      {
+        "endpoint": "GET /api/stats",
+        "method": "GET",
+        "total_requests": 50,
+        "successful": 0,
+        "failed": 50,
+        "success_rate_pct": 0.0,
+        "latency_ms": {
+          "mean": 2041.69,
+          "median": 2038.65,
+          "stdev": 16.62,
+          "min": 2010.23,
+          "max": 2082.84,
+          "p95": 2064.01,
+          "p99": 2073.76,
+          "ci_95_lower": 2037.08,
+          "ci_95_upper": 2046.29
+        }
+      },
+      {
+        "endpoint": "GET /api/security/threat-model",
+        "method": "GET",
+        "total_requests": 50,
+        "successful": 0,
+        "failed": 50,
+        "success_rate_pct": 0.0,
+        "latency_ms": {
+          "mean": 2035.88,
+          "median": 2034.78,
+          "stdev": 12.6,
+          "min": 2019.82,
+          "max": 2073.56,
+          "p95": 2059.21,
+          "p99": 2068.08,
+          "ci_95_lower": 2032.39,
+          "ci_95_upper": 2039.37
+        }
+      },
+      {
+        "endpoint": "GET /api/security/posture",
+        "method": "GET",
+        "total_requests": 50,
+        "successful": 0,
+        "failed": 50,
+        "success_rate_pct": 0.0,
+        "latency_ms": {
+          "mean": 2037.58,
+          "median": 2036.66,
+          "stdev": 9.31,
+          "min": 2014.41,
+          "max": 2061.55,
+          "p95": 2049.28,
+          "p99": 2056.11,
+          "ci_95_lower": 2035.0,
+          "ci_95_upper": 2040.16
+        }
+      },
+      {
+        "endpoint": "POST /api/submit-complaint",
+        "method": "POST",
+        "total_requests": 50,
+        "successful": 32,
+        "failed": 18,
+        "success_rate_pct": 64.0,
+        "latency_ms": {
+          "mean": 24122.67,
+          "median": 22515.68,
+          "stdev": 6641.06,
+          "min": 11750.68,
+          "max": 32088.31,
+          "p95": 32056.18,
+          "p99": 32073.11,
+          "ci_95_lower": 22281.87,
+          "ci_95_upper": 25963.48
+        }
+      }
+    ],
+    "system_info": {
+      "python_version": "3.13.7",
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 140 Stepping 2, GenuineIntel",
+      "machine": "AMD64"
+    }
+  }
+}
