@@ -186,29 +186,96 @@ class EviChainBlockchain:
         self.save_chain()
         return new_block
 
-    def is_chain_valid(self) -> bool:
-        """Verifica a integridade da blockchain"""
+    def validate_chain_detailed(self) -> Dict:
+        """Verifica a integridade da cadeia e relata onde ela falha.
+
+        Retorna um dicionário com ``valid``, ``first_invalid_index``,
+        ``failure`` (``hash_mismatch`` ou ``broken_link``), ``detail`` e
+        ``blocks_checked``.  O índice é devolvido ao chamador em vez de
+        apenas impresso, para que a API e o log de auditoria possam
+        registrar o ponto exato da divergência.
+
+        A verificação não interrompe a ingestão nem coloca o segmento
+        corrompido em quarentena: apenas relata. A recuperação é manual,
+        confrontando a cadeia com a última âncora externa válida.
+        """
         for i in range(1, len(self.chain)):
             current_block = self.chain[i]
-            previous_block = self.chain[i-1]
-            
+            previous_block = self.chain[i - 1]
+
             if current_block.hash != current_block.calculate_hash():
-                print(f"❌ Corrupção! Hash calculado do bloco {current_block.index} é inválido.")
-                return False
-            
+                detail = (f"Hash recalculado do bloco {current_block.index} "
+                          f"diverge do hash armazenado.")
+                print(f"❌ Corrupção! {detail}")
+                self._log_validation(False, current_block.index,
+                                     "hash_mismatch", detail)
+                return {
+                    "valid": False,
+                    "first_invalid_index": current_block.index,
+                    "failure": "hash_mismatch",
+                    "detail": detail,
+                    "blocks_checked": i + 1,
+                }
+
             if current_block.previous_hash != previous_block.hash:
-                print(f"❌ Corrupção! Elo quebrado entre bloco {previous_block.index} e {current_block.index}.")
-                return False
-        
-        return True
+                detail = (f"Elo quebrado entre os blocos "
+                          f"{previous_block.index} e {current_block.index}.")
+                print(f"❌ Corrupção! {detail}")
+                self._log_validation(False, current_block.index,
+                                     "broken_link", detail)
+                return {
+                    "valid": False,
+                    "first_invalid_index": current_block.index,
+                    "failure": "broken_link",
+                    "detail": detail,
+                    "blocks_checked": i + 1,
+                }
+
+        self._log_validation(True, None, None, "Cadeia íntegra.")
+        return {
+            "valid": True,
+            "first_invalid_index": None,
+            "failure": None,
+            "detail": "Cadeia íntegra.",
+            "blocks_checked": len(self.chain),
+        }
+
+    def _log_validation(self, valid: bool, index, failure, detail: str) -> None:
+        """Registra o resultado da validação no log de auditoria, se houver."""
+        audit = getattr(self, "audit_log", None)
+        if audit is None:
+            return
+        try:
+            audit.log_event(
+                "CHAIN_VALIDATED",
+                actor="system",
+                detail={
+                    "is_valid": valid,
+                    "block_count": len(self.chain),
+                    "first_invalid_index": index,
+                    "failure": failure,
+                    "message": detail,
+                },
+                severity="INFO" if valid else "CRITICAL",
+            )
+        except Exception:
+            pass
+
+    def is_chain_valid(self) -> bool:
+        """Verifica a integridade da blockchain (resultado booleano)."""
+        return self.validate_chain_detailed()["valid"]
 
     def get_chain_info(self) -> Dict:
         """Retorna informações gerais sobre a blockchain"""
+        validation = self.validate_chain_detailed()
         return {
             "total_blocks": len(self.chain),
             "last_block_hash": self.last_block.hash,
             "difficulty": self.difficulty,
-            "is_valid": self.is_chain_valid()
+            "is_valid": validation["valid"],
+            "first_invalid_index": validation["first_invalid_index"],
+            "validation_failure": validation["failure"],
+            "validation_detail": validation["detail"],
         }
 
     def get_all_complaints(self) -> List[Dict]:

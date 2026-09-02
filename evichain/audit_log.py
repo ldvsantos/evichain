@@ -51,6 +51,7 @@ class AuditLog:
         self,
         log_dir: str | Path | None = None,
         hmac_key: bytes | None = None,
+        external_sink: str | Path | None = None,
     ) -> None:
         self.log_dir = Path(
             log_dir or os.getenv("EVICHAIN_AUDIT_DIR", "data/audit")
@@ -58,6 +59,21 @@ class AuditLog:
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
         self.log_file = self.log_dir / "audit.jsonl"
+
+        #: Off-box append-only collector.  Entries are mirrored here as they
+        #: are written, so that an operator who edits or truncates the local
+        #: log leaves a divergence that :meth:`compare_with_external` detects.
+        raw_sink = external_sink or os.getenv("EVICHAIN_AUDIT_EXTERNAL_DIR")
+        self.external_sink = Path(raw_sink) if raw_sink else None
+        if self.external_sink is not None:
+            try:
+                self.external_sink.mkdir(parents=True, exist_ok=True)
+            except OSError:
+                self.external_sink = None
+
+        #: Set when the HMAC key had to be persisted next to the log, which
+        #: places it within reach of the operator it is meant to constrain.
+        self.key_colocated_with_log = False
 
         # HMAC key: from env (hex-encoded) or generate & persist
         raw_key = os.getenv("EVICHAIN_AUDIT_HMAC_KEY")
@@ -67,6 +83,7 @@ class AuditLog:
             self._hmac_key = bytes.fromhex(raw_key)
         else:
             key_path = self.log_dir / ".audit_key"
+            self.key_colocated_with_log = True
             if key_path.exists():
                 self._hmac_key = bytes.fromhex(
                     key_path.read_text(encoding="utf-8").strip()
@@ -112,8 +129,80 @@ class AuditLog:
         with open(self.log_file, "a", encoding="utf-8") as fh:
             fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
+        self._ship_external(entry)
+
         self._prev_digest = entry_hmac
         return entry
+
+    # ------------------------------------------------------------------
+    # Off-box collector
+    # ------------------------------------------------------------------
+
+    def _ship_external(self, entry: dict) -> bool:
+        """Mirror one entry to the external append-only collector.
+
+        Shipping is best effort: a collector outage must not block intake,
+        so a failure is swallowed and surfaces later as a gap detected by
+        :meth:`compare_with_external`.
+        """
+        if self.external_sink is None:
+            return False
+        try:
+            target = self.external_sink / "audit.jsonl"
+            with open(target, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            return True
+        except OSError:
+            return False
+
+    def compare_with_external(self) -> dict:
+        """Detect divergence between the local log and the external mirror.
+
+        An operator who rewrites the local log with a valid key produces an
+        internally consistent file, so :meth:`verify_integrity` alone cannot
+        detect the edit.  Comparing entry HMACs against the off-box mirror
+        exposes deletions, reorderings, and substitutions that the local
+        chain cannot reveal.
+        """
+        if self.external_sink is None:
+            return {
+                "available": False,
+                "detail": "no external collector configured "
+                          "(EVICHAIN_AUDIT_EXTERNAL_DIR)",
+            }
+
+        def digests(path: Path) -> list[str]:
+            if not path.exists():
+                return []
+            out = []
+            with open(path, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        out.append(json.loads(line).get("hmac", ""))
+                    except json.JSONDecodeError:
+                        out.append("")
+            return out
+
+        local = digests(self.log_file)
+        remote = digests(self.external_sink / "audit.jsonl")
+
+        missing = [d for d in remote if d not in set(local)]
+        divergence = [
+            i for i, (a, b) in enumerate(zip(local, remote), 1) if a != b
+        ]
+
+        return {
+            "available": True,
+            "local_entries": len(local),
+            "external_entries": len(remote),
+            "entries_missing_locally": len(missing),
+            "first_divergent_entry": divergence[0] if divergence else None,
+            "consistent": not missing and not divergence
+            and len(local) >= len(remote),
+        }
 
     def verify_integrity(self) -> dict:
         """Verify the full audit log chain.

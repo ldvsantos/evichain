@@ -24,6 +24,16 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+try:  # keep the DPIA text in step with the actual catalogue size
+    from evichain.threat_model import get_threat_catalogue as _get_threats
+
+    _N_THREATS = len(_get_threats())
+except Exception:  # pragma: no cover - the report must not fail on import order
+    _N_THREATS = 0
+_THREAT_COUNT_TEXT = (
+    f"{_N_THREATS} catalogued threats" if _N_THREATS else "the catalogued threats"
+)
+
 
 # ---------------------------------------------------------------
 # LGPD Article → Control mapping
@@ -115,7 +125,7 @@ LGPD_CONTROLS: list[dict] = [
         "lgpd_principle": "Relatório de impacto (DPIA)",
         "gdpr_equivalent": "Art. 35",
         "description": "Data Protection Impact Assessment for high-risk processing.",
-        "control_implemented": "This DPIA report; threat model with 9 catalogued threats.",
+        "control_implemented": f"This DPIA report; threat model with {_THREAT_COUNT_TEXT}.",
         "status": "compliant",
     },
     {

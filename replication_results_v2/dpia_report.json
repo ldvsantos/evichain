@@ -1,0 +1,146 @@
+{
+  "report_title": "EviChain – Data Protection Impact Assessment (DPIA)",
+  "legal_basis": "LGPD (Lei 13.709/2018) / GDPR cross-reference",
+  "system": "EviChain v2.0.0",
+  "generated_utc": "2026-09-01T23:21:07.733982+00:00",
+  "summary": {
+    "total_controls": 13,
+    "compliant": 11,
+    "partial": 2,
+    "non_compliant": 0,
+    "compliance_rate_pct": 84.6
+  },
+  "controls": [
+    {
+      "lgpd_article": "Art. 6, I",
+      "lgpd_principle": "Finalidade",
+      "gdpr_equivalent": "Art. 5(1)(b)",
+      "description": "Personal data processed only for complaint management purposes.",
+      "control_implemented": "Data collection limited to complaint-related fields; no secondary processing.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 6, II",
+      "lgpd_principle": "Adequação",
+      "gdpr_equivalent": "Art. 5(1)(b)",
+      "description": "Data collected is adequate and relevant to complaint investigation.",
+      "control_implemented": "Input form collects only necessary fields (title, description, council, category).",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 6, III",
+      "lgpd_principle": "Necessidade",
+      "gdpr_equivalent": "Art. 5(1)(c)",
+      "description": "Collection limited to minimum necessary for regulatory purpose.",
+      "control_implemented": "Anonymous submission supported; no mandatory PII beyond complaint text.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 6, VI",
+      "lgpd_principle": "Transparência",
+      "gdpr_equivalent": "Art. 5(1)(a), Art. 12-14",
+      "description": "Clear information about data processing purposes.",
+      "control_implemented": "Privacy notice in web UI; threat model publicly accessible via API.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 6, VII",
+      "lgpd_principle": "Segurança",
+      "gdpr_equivalent": "Art. 5(1)(f), Art. 32",
+      "description": "Technical and organizational measures to protect personal data.",
+      "control_implemented": "SHA-256 hash chaining, TLS in production, OWASP security headers, rate limiting, input sanitization.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 6, VIII",
+      "lgpd_principle": "Prevenção",
+      "gdpr_equivalent": "Art. 25, Art. 32",
+      "description": "Preventive measures against data damage.",
+      "control_implemented": "Blockchain tamper-evidence; append-only audit log; external hash anchoring.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 6, X",
+      "lgpd_principle": "Responsabilização e prestação de contas",
+      "gdpr_equivalent": "Art. 5(2)",
+      "description": "Demonstrate compliance with data protection measures.",
+      "control_implemented": "STRIDE threat model; DPIA report; open-source code; replication package.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 7, III",
+      "lgpd_principle": "Base legal – administração pública",
+      "gdpr_equivalent": "Art. 6(1)(e)",
+      "description": "Processing necessary for public administration duties.",
+      "control_implemented": "Professional councils are autarchic public bodies (Lei 9.696/1998); complaint processing is a legal duty.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 46",
+      "lgpd_principle": "Medidas de segurança",
+      "gdpr_equivalent": "Art. 32",
+      "description": "Security measures to protect personal data from unauthorized access.",
+      "control_implemented": "TLS transport encryption; content-security-policy headers; non-root service account deployment; HMAC-chained audit log.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 37",
+      "lgpd_principle": "Registro de operações",
+      "gdpr_equivalent": "Art. 30",
+      "description": "Records of processing activities.",
+      "control_implemented": "All evidence transactions recorded in blockchain with timestamps; audit log tracks all operations.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 38",
+      "lgpd_principle": "Relatório de impacto (DPIA)",
+      "gdpr_equivalent": "Art. 35",
+      "description": "Data Protection Impact Assessment for high-risk processing.",
+      "control_implemented": "This DPIA report; threat model with 10 catalogued threats.",
+      "status": "compliant"
+    },
+    {
+      "lgpd_article": "Art. 18, VI",
+      "lgpd_principle": "Direito à eliminação",
+      "gdpr_equivalent": "Art. 17",
+      "description": "Right to erasure of personal data.",
+      "control_implemented": "Blockchain by design is append-only; erasure of on-chain data conflicts with evidence integrity. Documented as non-guarantee. Off-chain PII can be redacted.",
+      "status": "partial",
+      "residual_risk": "Complaint text containing PII is stored on-chain and cannot be deleted without chain rewrite. Mitigation: anonymization of complaints encouraged in UI."
+    },
+    {
+      "lgpd_article": "Art. 48",
+      "lgpd_principle": "Comunicação de incidente",
+      "gdpr_equivalent": "Art. 33-34",
+      "description": "Notification of data breaches to authority and data subjects.",
+      "control_implemented": "Security event logging in audit log; chain validation detects tampering. Incident notification procedure to be defined by deploying council.",
+      "status": "partial",
+      "residual_risk": "Automated breach notification to ANPD not implemented. Institutional procedure required."
+    }
+  ],
+  "residual_risks": [
+    {
+      "lgpd_article": "Art. 18, VI",
+      "lgpd_principle": "Direito à eliminação",
+      "gdpr_equivalent": "Art. 17",
+      "description": "Right to erasure of personal data.",
+      "control_implemented": "Blockchain by design is append-only; erasure of on-chain data conflicts with evidence integrity. Documented as non-guarantee. Off-chain PII can be redacted.",
+      "status": "partial",
+      "residual_risk": "Complaint text containing PII is stored on-chain and cannot be deleted without chain rewrite. Mitigation: anonymization of complaints encouraged in UI."
+    },
+    {
+      "lgpd_article": "Art. 48",
+      "lgpd_principle": "Comunicação de incidente",
+      "gdpr_equivalent": "Art. 33-34",
+      "description": "Notification of data breaches to authority and data subjects.",
+      "control_implemented": "Security event logging in audit log; chain validation detects tampering. Incident notification procedure to be defined by deploying council.",
+      "status": "partial",
+      "residual_risk": "Automated breach notification to ANPD not implemented. Institutional procedure required."
+    }
+  ],
+  "recommendations": [
+    "Implement off-chain PII redaction mechanism for Art. 18 compliance.",
+    "Define incident notification procedure per Art. 48 with deploying council.",
+    "Conduct periodic DPIA review (annually or upon significant system change)."
+  ]
+}

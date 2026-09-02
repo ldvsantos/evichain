@@ -22,6 +22,7 @@ from evichain import Services, create_services, load_settings
 from evichain.threat_model import get_threat_catalogue, get_security_posture, get_threat_summary
 from evichain.audit_log import AuditLog
 from evichain.external_anchor import ExternalAnchor
+from evichain.input_validation import ValidationError, validate_payload
 
 
 app = Flask(__name__)
@@ -170,6 +171,23 @@ def after_request(response):
         "connect-src 'self'"
     )
 
+    # Error-detail scrubbing (T-06). Handlers across the API embed the raw
+    # exception string in the response body, which can expose filesystem
+    # paths and library internals. Any 5xx JSON response leaving the process
+    # has that field replaced by a correlation identifier; the full detail
+    # stays in the server-side trace log.
+    if response.status_code >= 500 and response.is_json:
+        try:
+            body = response.get_json(silent=True)
+        except Exception:
+            body = None
+        if isinstance(body, dict) and 'error' in body:
+            incident = f"ERR-{uuid.uuid4().hex[:8]}"
+            log_trace(incident, 'error_detail_withheld', str(body['error']))
+            body['error'] = 'Erro interno. Consulte o log do servidor.'
+            body['incident_id'] = incident
+            response.set_data(json.dumps(body))
+
     return response
 
 
@@ -280,36 +298,36 @@ def submit_complaint():
             data = _parse_loose_object(raw_body)
             if data is None: return jsonify({"success": False, "error": "Formato JSON inválido."}), 400
 
-        # ===== CORREÇÃO FINAL =====
-        title = data.get('titulo', 'Denúncia sem Título')
-        nome_denunciado = data.get('nomeDenunciado', '').strip()
-        description = data.get('descricao', '')
-        # ==========================
-        
-        if not description:
-            return jsonify({"success": False, "error": "O campo 'descricao' é obrigatório."}), 400
-            
-        if not nome_denunciado:
-            return jsonify({"success": False, "error": "O campo 'nomeDenunciado' é obrigatório."}), 400
-        
-        # Validação dos novos campos obrigatórios
-        assunto = data.get('assunto', '').strip()
-        finalidade = data.get('finalidade', '').strip()
-        
-        if not assunto:
-            return jsonify({"success": False, "error": "O campo 'assunto' é obrigatório."}), 400
-            
-        if not finalidade:
-            return jsonify({"success": False, "error": "O campo 'finalidade' é obrigatório."}), 400
+        # Validação declarativa de esquema no limite HTTP: tipos, limites de
+        # comprimento, listas de valores aceitos e remoção de caracteres de
+        # controle, antes de qualquer persistência ou chamada ao modelo.
+        try:
+            payload = validate_payload(
+                data, body_bytes=request.content_length or 0
+            )
+        except ValidationError as exc:
+            log_trace(trace_id, f'validation_rejected:{exc.field}')
+            return jsonify({
+                "success": False,
+                "error": "Requisição inválida.",
+                "field": exc.field,
+                "detail": exc.message,
+            }), 400
+
+        title = payload['titulo']
+        nome_denunciado = payload['nomeDenunciado']
+        description = payload['descricao']
+        assunto = payload['assunto']
+        finalidade = payload['finalidade']
 
         transaction_data = {
             'titulo': title,
             'nomeDenunciado': nome_denunciado,
             'descricao': description,
-            'conselho': data.get('conselho', 'N/A'),
-            'categoria': data.get('categoria', 'N/A'),
-            'anonymous': data.get('anonymous', True),
-            'ouvidoriaAnonima': data.get('ouvidoriaAnonima', False),
+            'conselho': payload['conselho'],
+            'categoria': payload['categoria'],
+            'anonymous': payload['anonymous'],
+            'ouvidoriaAnonima': payload['ouvidoriaAnonima'],
             'assunto': data.get('assunto', ''),
             'prioridade': data.get('prioridade', ''),
             'finalidade': data.get('finalidade', ''),

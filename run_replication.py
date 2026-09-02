@@ -34,6 +34,17 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
+# Several modules print status lines containing emoji.  On Windows the console
+# defaults to a legacy code page and those prints raise UnicodeEncodeError,
+# which previously aborted the benchmark stage on that platform while the same
+# run succeeded on Linux.  Force UTF-8 on the standard streams so the runner
+# behaves identically everywhere.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):  # pragma: no cover - non-reconfigurable stream
+        pass
+
 
 def ensure_project_path():
     """Ensure the project root is in sys.path."""
@@ -157,14 +168,14 @@ def run_replication(output_dir: str = "replication_results",
     # ── Step 5: LGPD/GDPR Compliance Report ──
     print("  [5/6] Generating LGPD/GDPR compliance report...")
     try:
-        from evichain.lgpd_compliance import LGPDComplianceMatrix
-        lgpd = LGPDComplianceMatrix()
+        from evichain.lgpd_compliance import LGPDComplianceReport
+        lgpd = LGPDComplianceReport()
         dpia_path = os.path.join(output_dir, "dpia_report.json")
-        lgpd.generate_dpia_report(dpia_path, fmt="json")
+        lgpd.export_json(dpia_path)
         summary["steps"]["lgpd_compliance"] = {
             "status": "ok",
             "file": dpia_path,
-            "compliance_summary": lgpd.compliance_summary(),
+            "compliance_summary": "LGPD–GDPR compliance matrix and DPIA exported to JSON",
         }
         print(f"        Saved to {dpia_path}")
     except Exception as e:
@@ -194,13 +205,18 @@ def run_replication(output_dir: str = "replication_results",
                 "run_replication.py",
                 "requirements.txt",
                 "blockchain_simulator.py",
+                "api_server.py",
                 "evichain/threat_model.py",
                 "evichain/external_anchor.py",
                 "evichain/audit_log.py",
+                "evichain/input_validation.py",
                 "evichain/lgpd_compliance.py",
                 "evichain/settings.py",
                 "evichain/services.py",
                 "load_benchmark.py",
+                "run_load_test.py",
+                "write_benchmark.py",
+                "plot_validation_scalability.py",
             ]
             for sf in source_files:
                 sf_full = project_root / sf

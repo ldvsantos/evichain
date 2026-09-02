@@ -75,7 +75,7 @@ class Threat:
     asset: str
     mitigation: str
     residual_risk: str
-    status: str = "mitigated"  # mitigated | accepted | open
+    status: str = "mitigated"  # mitigated | partially_mitigated | accepted | open
 
 
 # ── Threat Registry ───────────────────────────────────────────────
@@ -135,7 +135,7 @@ THREAT_CATALOGUE: List[Threat] = [
             "can regenerate valid hashes.  External timestamping or "
             "periodic anchoring to a public blockchain could reduce this."
         ),
-        status="accepted",
+        status="partially_mitigated",
     ),
     Threat(
         id="T-04",
@@ -147,9 +147,12 @@ THREAT_CATALOGUE: List[Threat] = [
         ),
         asset="Complaint submission endpoint / blockchain state",
         mitigation=(
-            "Strict input validation with field-level type checking.  "
-            "JSON body parsing with safe defaults.  No eval/exec on "
-            "user-supplied data."
+            "Declarative schema validation at the HTTP boundary "
+            "(evichain.input_validation.validate_payload): field allowlist, "
+            "type checking, length bounds, value allowlists, digest format "
+            "checking, body-size ceiling and control-character stripping.  "
+            "Unknown fields are reported and discarded rather than "
+            "propagated.  No eval/exec on user-supplied data."
         ),
         residual_risk="Low.",
         status="mitigated",
@@ -171,9 +174,11 @@ THREAT_CATALOGUE: List[Threat] = [
             "Trace IDs are logged server-side for correlation."
         ),
         residual_risk=(
-            "Low — hash-chain provides cryptographic proof of existence."
+            "Medium — the hash chain proves that a given content existed at "
+            "a given time, but without client authentication (T-01) it "
+            "cannot bind that content to a specific person."
         ),
-        status="mitigated",
+        status="partially_mitigated",
     ),
 
     # ── Information Disclosure ──
@@ -187,9 +192,11 @@ THREAT_CATALOGUE: List[Threat] = [
         ),
         asset="Complaint content, complainant identity",
         mitigation=(
-            "Anonymous complaints omit identity fields.  Error responses "
-            "return generic messages; stack traces are logged server-side "
-            "only.  Security headers (X-Content-Type-Options, "
+            "Anonymous complaints omit identity fields.  A response filter "
+            "replaces the diagnostic detail of any 5xx JSON response with a "
+            "correlation identifier before it leaves the process, so raw "
+            "exception strings and filesystem paths stay in the server-side "
+            "trace log.  Security headers (X-Content-Type-Options, "
             "X-Frame-Options, CSP) are set via middleware."
         ),
         residual_risk="Low with proper deployment configuration.",
@@ -253,6 +260,33 @@ THREAT_CATALOGUE: List[Threat] = [
         residual_risk="Low.",
         status="mitigated",
     ),
+    Threat(
+        id="T-10",
+        category=StrideCategory.TAMPERING,
+        adversary=AdversaryClass.EXTERNAL,
+        description=(
+            "Complaint text carries instructions addressed to the language "
+            "model rather than to the council, aiming to alter the severity "
+            "score, the applicable articles or the recommendation."
+        ),
+        asset="AI triage output / analyst prioritisation",
+        mitigation=(
+            "Complaint text is never concatenated into the instruction "
+            "region of the prompt.  It is fenced by a per-request random "
+            "delimiter, embedded delimiters are broken, known "
+            "instruction-override markers and chat-template tokens are "
+            "removed, and the system message states that fenced content is "
+            "data.  The model output is constrained to a fixed JSON schema "
+            "and discarded if it deviates."
+        ),
+        residual_risk=(
+            "Medium — marker removal is pattern-based and cannot recognise "
+            "paraphrased or obfuscated instructions.  Fencing reduces the "
+            "attack surface but offers no formal guarantee, and the AI "
+            "output is advisory rather than adjudicative for this reason."
+        ),
+        status="partially_mitigated",
+    ),
 ]
 
 
@@ -266,11 +300,16 @@ class SecurityPosture:
         "Tamper-evidence: any modification to a historical block is "
         "detectable via SHA-256 hash-chain validation.",
 
+        "External anchoring: periodic RFC 3161 timestamping of the chain "
+        "root creates a verification path independent of the operator, "
+        "making a privileged rewrite detectable after the fact.",
+
         "Non-repudiation: once mined, a transaction's existence at a "
         "specific time is cryptographically provable.",
 
-        "Input sanitisation: all user-supplied data is validated and "
-        "type-checked before processing.",
+        "Schema validation: every submitted field is checked against a "
+        "declarative schema for type, length and permitted values before "
+        "it reaches persistence or the language model.",
 
         "Transport security: TLS is enforced in production deployments.",
 
@@ -286,11 +325,20 @@ class SecurityPosture:
         "Byzantine fault tolerance: there is no distributed consensus.  "
         "The blockchain is a local data structure for integrity checking.",
 
+        "Submitter identity non-repudiation: without authenticated client "
+        "certificates the system cannot cryptographically bind a complaint "
+        "to a specific person, only to a content and a time.",
+
         "Confidentiality at rest: the blockchain JSON file is stored in "
         "plaintext.  File-system permissions are the primary access control.",
 
         "DDoS resilience: the application does not include infrastructure-"
         "level DDoS protection.",
+
+        "Prompt-injection immunity: complaint text is fenced and screened "
+        "for known instruction-override markers, but pattern matching "
+        "cannot recognise paraphrased instructions.  The AI output is "
+        "advisory and is reviewed by an analyst before adjudication.",
 
         "Formal verification: the blockchain simulator has not been "
         "formally verified (model-checked).",

@@ -1,0 +1,150 @@
+{
+  "threats": [
+    {
+      "id": "T-01",
+      "category": "Spoofing",
+      "adversary": "external",
+      "description": "An external attacker submits a complaint impersonating a legitimate user through the public API.",
+      "asset": "Complaint submission endpoint",
+      "mitigation": "The system accepts anonymous complaints by design (regulatory requirement).  Input validation sanitises all fields.  Rate limiting middleware restricts submissions per IP.",
+      "residual_risk": "Low — anonymous submission is a feature, not a bug.",
+      "status": "accepted"
+    },
+    {
+      "id": "T-02",
+      "category": "Spoofing",
+      "adversary": "external",
+      "description": "API responses could be spoofed in transit (MITM).",
+      "asset": "HTTP transport",
+      "mitigation": "Production deployment uses TLS termination at the reverse proxy (nginx) with certificates from Let's Encrypt / ACM.",
+      "residual_risk": "Negligible when TLS is enforced.",
+      "status": "mitigated"
+    },
+    {
+      "id": "T-03",
+      "category": "Tampering",
+      "adversary": "privileged_admin",
+      "description": "An administrator with file-system access rewrites the blockchain JSON data file, forging/deleting historical blocks.",
+      "asset": "Blockchain data file (blockchain_data.json)",
+      "mitigation": "Hash-chain validation detects any modification to previous blocks (tamper-evidence).  Periodic off-site backups and SHA-256 checksum snapshots provide an audit trail.  NOTE: We explicitly do NOT claim immutability — the single-node architecture cannot prevent a privileged rewrite, only detect it.",
+      "residual_risk": "Medium — tamper-evidence ≠ tamper-proof.  A privileged admin can regenerate valid hashes.  External timestamping or periodic anchoring to a public blockchain could reduce this.",
+      "status": "partially_mitigated"
+    },
+    {
+      "id": "T-04",
+      "category": "Tampering",
+      "adversary": "external",
+      "description": "Malicious JSON payload in complaint submission manipulates server-side data structures.",
+      "asset": "Complaint submission endpoint / blockchain state",
+      "mitigation": "Declarative schema validation at the HTTP boundary (evichain.input_validation.validate_payload): field allowlist, type checking, length bounds, value allowlists, digest format checking, body-size ceiling and control-character stripping.  Unknown fields are reported and discarded rather than propagated.  No eval/exec on user-supplied data.",
+      "residual_risk": "Low.",
+      "status": "mitigated"
+    },
+    {
+      "id": "T-05",
+      "category": "Repudiation",
+      "adversary": "unprivileged_insider",
+      "description": "A complainant denies having submitted a specific complaint.",
+      "asset": "Complaint records",
+      "mitigation": "Each complaint is timestamped and hashed into a block.  The blockchain provides a non-repudiation chain: once mined, the transaction hash proves existence at a specific time.  Trace IDs are logged server-side for correlation.",
+      "residual_risk": "Medium — the hash chain proves that a given content existed at a given time, but without client authentication (T-01) it cannot bind that content to a specific person.",
+      "status": "partially_mitigated"
+    },
+    {
+      "id": "T-06",
+      "category": "Information Disclosure",
+      "adversary": "external",
+      "description": "Sensitive complaint data leaked via API responses, error messages or log files.",
+      "asset": "Complaint content, complainant identity",
+      "mitigation": "Anonymous complaints omit identity fields.  A response filter replaces the diagnostic detail of any 5xx JSON response with a correlation identifier before it leaves the process, so raw exception strings and filesystem paths stay in the server-side trace log.  Security headers (X-Content-Type-Options, X-Frame-Options, CSP) are set via middleware.",
+      "residual_risk": "Low with proper deployment configuration.",
+      "status": "mitigated"
+    },
+    {
+      "id": "T-07",
+      "category": "Information Disclosure",
+      "adversary": "privileged_admin",
+      "description": "OpenAI API key or other secrets exposed through environment variables, .env files, or source code.",
+      "asset": "API credentials",
+      "mitigation": "Secrets loaded from environment variables (never hardcoded).  .env files excluded from version control via .gitignore.  Key rotation policy documented.",
+      "residual_risk": "Low.",
+      "status": "mitigated"
+    },
+    {
+      "id": "T-08",
+      "category": "Denial of Service",
+      "adversary": "external",
+      "description": "Flood of complaint submissions exhausts server resources (CPU via Proof of Work mining, disk via JSON writes).",
+      "asset": "API availability",
+      "mitigation": "Rate limiting middleware limits requests per IP per window.  Mining difficulty is fixed at 4 (bounded computation).  Waitress/gunicorn worker pool limits concurrency.",
+      "residual_risk": "Medium — sustained DDoS requires infrastructure-level protection (CloudFlare, AWS WAF) beyond application scope.",
+      "status": "mitigated"
+    },
+    {
+      "id": "T-09",
+      "category": "Elevation of Privilege",
+      "adversary": "external",
+      "description": "External attacker gains admin-level access through API vulnerabilities (e.g., path traversal, injection).",
+      "asset": "Server integrity",
+      "mitigation": "Flask's send_from_directory prevents path traversal.  No SQL database (eliminates SQLi).  No eval/exec on inputs.  Dependencies kept up-to-date via pip audit.",
+      "residual_risk": "Low.",
+      "status": "mitigated"
+    },
+    {
+      "id": "T-10",
+      "category": "Tampering",
+      "adversary": "external",
+      "description": "Complaint text carries instructions addressed to the language model rather than to the council, aiming to alter the severity score, the applicable articles or the recommendation.",
+      "asset": "AI triage output / analyst prioritisation",
+      "mitigation": "Complaint text is never concatenated into the instruction region of the prompt.  It is fenced by a per-request random delimiter, embedded delimiters are broken, known instruction-override markers and chat-template tokens are removed, and the system message states that fenced content is data.  The model output is constrained to a fixed JSON schema and discarded if it deviates.",
+      "residual_risk": "Medium — marker removal is pattern-based and cannot recognise paraphrased or obfuscated instructions.  Fencing reduces the attack surface but offers no formal guarantee, and the AI output is advisory rather than adjudicative for this reason.",
+      "status": "partially_mitigated"
+    }
+  ],
+  "posture": {
+    "guarantees": [
+      "Tamper-evidence: any modification to a historical block is detectable via SHA-256 hash-chain validation.",
+      "External anchoring: periodic RFC 3161 timestamping of the chain root creates a verification path independent of the operator, making a privileged rewrite detectable after the fact.",
+      "Non-repudiation: once mined, a transaction's existence at a specific time is cryptographically provable.",
+      "Schema validation: every submitted field is checked against a declarative schema for type, length and permitted values before it reaches persistence or the language model.",
+      "Transport security: TLS is enforced in production deployments.",
+      "Secret management: credentials are loaded from environment variables, never hardcoded."
+    ],
+    "non_guarantees": [
+      "Immutability: a privileged administrator CAN rewrite the entire chain (single-node architecture).  We claim tamper-evidence, not immutability.",
+      "Byzantine fault tolerance: there is no distributed consensus.  The blockchain is a local data structure for integrity checking.",
+      "Submitter identity non-repudiation: without authenticated client certificates the system cannot cryptographically bind a complaint to a specific person, only to a content and a time.",
+      "Confidentiality at rest: the blockchain JSON file is stored in plaintext.  File-system permissions are the primary access control.",
+      "DDoS resilience: the application does not include infrastructure-level DDoS protection.",
+      "Prompt-injection immunity: complaint text is fenced and screened for known instruction-override markers, but pattern matching cannot recognise paraphrased instructions.  The AI output is advisory and is reviewed by an analyst before adjudication.",
+      "Formal verification: the blockchain simulator has not been formally verified (model-checked)."
+    ]
+  },
+  "summary": {
+    "total_threats": 10,
+    "by_status": {
+      "accepted": 1,
+      "mitigated": 6,
+      "partially_mitigated": 3
+    },
+    "by_category": {
+      "Spoofing": 2,
+      "Tampering": 3,
+      "Repudiation": 1,
+      "Information Disclosure": 2,
+      "Denial of Service": 1,
+      "Elevation of Privilege": 1
+    },
+    "by_adversary": {
+      "external": 7,
+      "privileged_admin": 2,
+      "unprivileged_insider": 1
+    },
+    "methodology": "STRIDE (Microsoft SDL)",
+    "adversary_classes": [
+      "external",
+      "unprivileged_insider",
+      "privileged_admin"
+    ]
+  }
+}
